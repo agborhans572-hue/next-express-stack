@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790544000000,
+      "tag": "0000_shiprion_production",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790544000001,
+      "tag": "0001_socket_io_coordination",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790544000002,
+      "tag": "0002_shipment_ownership_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790544000003,
+      "tag": "0003_quote_conversion_unique",
+      "breakpoints": true
+    }
+  ]
+}

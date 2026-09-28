@@ -1,0 +1,60 @@
+"Enhance the entire courier web app with futuristic, smooth, and premium animations using Framer Motion and Tailwind CSS transitions.
+
+Global Animations:
+- Add page transition animations (fade + slight upward motion) when navigating between pages
+- Implement smooth loading skeletons and shimmer effects while data is loading
+- Add subtle background gradient movement or glow animation across the dashboard
+
+Sidebar:
+- Animate sidebar icons with scale-up and glow effect on hover
+- Add smooth active state indicator sliding between icons
+- Add tooltip fade-in animation when hovering icons
+
+Top Navbar:
+- Animate search bar expansion on focus
+- Add notification bell pulse animation when new updates arrive
+- Add dropdown menu animation (scale + fade)
+
+Dashboard Cards:
+- Animate cards on load with staggered fade + slide-up effect
+- Add hover animation: slight lift (translateY), soft glow, and scale (1.02)
+- Add animated number counters (count up effect) for statistics
+
+Live Fleet Map Section:
+- Animate location markers with pulsing ripple effect
+- Animate route line drawing (line grows from origin to destination)
+- Add floating movement animation to shipment icons (plane, truck)
+- Animate status updates in real-time with smooth transitions
+
+Shipment List:
+- Animate list items appearing with staggered fade-in
+- Add hover highlight with soft glow and slight slide
+- Animate status badge color transitions smoothly
+
+Charts:
+- Animate chart bars growing from bottom on load
+- Add hover highlight animation on bars
+- Smooth transitions when data updates
+
+Fleet Status:
+- Animate progress bars filling from 0% to actual value
+- Add glowing gradient animation inside progress bars
+
+Buttons:
+- Add ripple click effect
+- Add hover glow and subtle scale-up
+- Add loading spinner animation on submit
+
+Micro-interactions:
+- Add smooth input focus animations (border glow)
+- Add success/error toast notifications with slide-in animation
+- Add modal animations (fade + scale)
+
+Performance Rules:
+- Use Framer Motion for complex animations
+- Use Tailwind transitions for simple hover effects
+- Keep animations smooth (0.2s–0.5s)
+- Avoid heavy animations that affect performance
+
+Final Goal:
+The app should feel futuristic, fluid, and interactive — similar to high-end SaaS dashboards and modern logistics platforms, with smooth motion, glowing UI, and real-time feedback."

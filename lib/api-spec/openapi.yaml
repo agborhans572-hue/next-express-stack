@@ -1,0 +1,2033 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 1.0.0
+  description: Production API for Shiprion quotes, shipments, tracking, accounts, support, and operations.
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User management (admin only)
+  - name: shipments
+    description: Shipment management
+  - name: tracking
+    description: Shipment tracking events
+  - name: contact
+    description: Contact form
+  - name: rates
+    description: Versioned service rates and estimates
+  - name: quotes
+    description: Quote request and offer workflow
+  - name: notifications
+    description: Persistent customer notifications
+  - name: uploads
+    description: Private proof-of-delivery storage
+  - name: support
+    description: Authenticated and guest support chat
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out
+      responses:
+        "204":
+          description: Logged out successfully
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (admin only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by ID (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user's status or role (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /contact:
+    get:
+      operationId: listContactMessages
+      tags: [contact]
+      summary: List contact messages for support staff
+      parameters:
+        - {
+            name: page,
+            in: query,
+            schema: { type: integer, minimum: 1, default: 1 },
+          }
+      responses:
+        "200":
+          description: Paginated contact messages
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/ContactMessagePage" } },
+            }
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit a contact message
+      description: Public endpoint — no authentication required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactBody"
+      responses:
+        "201":
+          description: Message received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /track/{trackingNumber}:
+    get:
+      operationId: trackShipment
+      tags: [shipments]
+      summary: Track a shipment by tracking number (public)
+      description: Public endpoint — no authentication required.
+      parameters:
+        - name: trackingNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shipment and tracking events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentWithTracking"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shipments:
+    get:
+      operationId: listShipments
+      tags: [shipments]
+      summary: List shipments
+      description: Admins see all shipments. Regular users see only their own.
+      parameters:
+        - {
+            name: page,
+            in: query,
+            schema: { type: integer, minimum: 1, default: 1 },
+          }
+        - {
+            name: pageSize,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
+          }
+      responses:
+        "200":
+          description: List of shipments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentPage"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      operationId: createShipment
+      tags: [shipments]
+      summary: Create a shipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShipmentBody"
+      responses:
+        "201":
+          description: Shipment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shipments/{id}:
+    get:
+      operationId: getShipment
+      tags: [shipments]
+      summary: Get a shipment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Shipment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      operationId: updateShipment
+      tags: [shipments]
+      summary: Update a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShipmentBody"
+      responses:
+        "200":
+          description: Updated shipment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteShipment
+      tags: [shipments]
+      summary: Delete a shipment (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shipments/{id}/tracking:
+    get:
+      operationId: listTrackingEvents
+      tags: [tracking]
+      summary: Get tracking events for a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of tracking events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrackingEvent"
+        "404":
+          description: Shipment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      operationId: createTrackingEvent
+      tags: [tracking]
+      summary: Add a tracking event (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTrackingEventBody"
+      responses:
+        "201":
+          description: Tracking event added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingEvent"
+        "404":
+          description: Shipment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shipments/{id}/assign:
+    patch:
+      operationId: assignShipmentCustomer
+      tags: [shipments]
+      summary: Assign a legacy shipment to an active customer
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [customerId],
+                    properties: { customerId: { type: integer } },
+                  },
+              },
+          }
+      responses:
+        "200":
+          {
+            description: Shipment assigned,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Shipment" } },
+              },
+          }
+
+  /readyz:
+    get:
+      operationId: readinessCheck
+      tags: [health]
+      summary: Verify database readiness
+      responses:
+        "200": { description: Ready }
+        "503": { description: Unavailable }
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8, maxLength: 128 }
+                fullName: { type: string, minLength: 2, maxLength: 120 }
+      responses:
+        "201": { description: Verification email requested }
+
+  /auth/verify-email:
+    post:
+      operationId: verifyEmail
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, pattern: "^[0-9]{6}$" }
+      responses:
+        "200":
+          description: Verified account
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/CurrentUser" } },
+            }
+
+  /auth/resend-verification:
+    post:
+      operationId: resendVerification
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [email],
+                    properties: { email: { type: string, format: email } },
+                  },
+              },
+          }
+      responses:
+        "200": { description: Generic delivery acknowledgement }
+
+  /auth/profile:
+    patch:
+      operationId: updateProfile
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/UpdateProfileBody" } },
+          }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/CurrentUser" } },
+            }
+
+  /auth/change-password:
+    post:
+      operationId: changePassword
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 8, maxLength: 128 }
+      responses:
+        "204": { description: Password changed }
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [email],
+                    properties: { email: { type: string, format: email } },
+                  },
+              },
+          }
+      responses:
+        "200": { description: Generic delivery acknowledgement }
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, minLength: 8, maxLength: 128 }
+      responses:
+        "204": { description: Password reset }
+
+  /auth/sessions:
+    get:
+      operationId: listSessions
+      tags: [auth]
+      responses:
+        "200": { description: Account sessions }
+
+  /auth/sessions/{id}:
+    delete:
+      operationId: revokeSession
+      tags: [auth]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Session revoked }
+
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [users]
+      responses:
+        "200": { description: Active and inactive customer directory }
+
+  /contact/{id}:
+    patch:
+      operationId: updateContactMessage
+      tags: [contact]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [status],
+                    properties:
+                      {
+                        status:
+                          { type: string, enum: [new, read, replied, closed] },
+                      },
+                  },
+              },
+          }
+      responses:
+        "200": { description: Updated contact message }
+
+  /rates:
+    get:
+      operationId: listActiveRates
+      tags: [rates]
+      responses:
+        "200":
+          description: Active service rates
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/ServiceRateList" } },
+            }
+
+  /rates/estimate:
+    post:
+      operationId: estimateRate
+      tags: [rates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serviceCode, weightKg]
+              properties:
+                serviceCode: { type: string }
+                weightKg: { type: number, exclusiveMinimum: 0 }
+      responses:
+        "200":
+          description: Server-calculated estimate
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/RateEstimate" } },
+            }
+
+  /admin/rates:
+    get:
+      operationId: listAllRates
+      tags: [rates]
+      responses:
+        "200": { description: Every service-rate version }
+    post:
+      operationId: createRateVersion
+      tags: [rates]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/CreateRateBody" } },
+          }
+      responses:
+        "201": { description: Activated service-rate version }
+
+  /admin/rates/{id}:
+    patch:
+      operationId: setRateActive
+      tags: [rates]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [active],
+                    properties: { active: { type: boolean } },
+                  },
+              },
+          }
+      responses:
+        "200": { description: Updated rate activation }
+
+  /quotes:
+    get:
+      operationId: listQuotes
+      tags: [quotes]
+      parameters:
+        - {
+            name: page,
+            in: query,
+            schema: { type: integer, minimum: 1, default: 1 },
+          }
+        - {
+            name: pageSize,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
+          }
+      responses:
+        "200":
+          description: Authorized quote page
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/QuotePage" } },
+            }
+    post:
+      operationId: submitQuote
+      tags: [quotes]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/SubmitQuoteBody" } },
+          }
+      responses:
+        "201":
+          description: Quote submitted
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/Quote" } },
+            }
+
+  /quotes/claim:
+    post:
+      operationId: claimQuote
+      tags: [quotes]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [token],
+                    properties: { token: { type: string } },
+                  },
+              },
+          }
+      responses:
+        "200": { description: Quote linked to verified account }
+
+  /quotes/{id}:
+    get:
+      operationId: getQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Authorized quote
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/Quote" } },
+            }
+
+  /quotes/{id}/review:
+    patch:
+      operationId: reviewQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Quote moved into review } }
+
+  /quotes/{id}/offer:
+    post:
+      operationId: offerQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [finalPriceCents],
+                    properties:
+                      {
+                        finalPriceCents: { type: integer, minimum: 0 },
+                        validDays:
+                          {
+                            type: integer,
+                            minimum: 1,
+                            maximum: 90,
+                            default: 14,
+                          },
+                      },
+                  },
+              },
+          }
+      responses: { "200": { description: Offer published } }
+
+  /quotes/{id}/accept:
+    post:
+      operationId: acceptQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Offer accepted } }
+
+  /quotes/{id}/reject:
+    post:
+      operationId: rejectQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Offer rejected } }
+
+  /quotes/{id}/convert:
+    post:
+      operationId: convertQuote
+      tags: [quotes]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/ConvertQuoteBody" } },
+          }
+      responses:
+        "201":
+          description: Shipment created exactly once
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/Shipment" } },
+            }
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      responses:
+        "200":
+          description: Notification page and unread count
+          content:
+            {
+              application/json:
+                { schema: { $ref: "#/components/schemas/NotificationPage" } },
+            }
+
+  /notifications/{id}/read:
+    patch:
+      operationId: readNotification
+      tags: [notifications]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Notification marked read } }
+
+  /notifications/read-all:
+    post:
+      operationId: readAllNotifications
+      tags: [notifications]
+      responses: { "204": { description: All notifications marked read } }
+
+  /shipments/map:
+    get:
+      operationId: listShipmentMap
+      tags: [shipments]
+      responses:
+        { "200": { description: Latest geocoded active-shipment locations } }
+
+  /uploads/presign:
+    post:
+      operationId: presignProofUpload
+      tags: [uploads]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/PresignUploadBody" } },
+          }
+      responses: { "200": { description: Five-minute private upload URL } }
+
+  /shipments/{id}/proof-of-delivery:
+    get:
+      operationId: getProofOfDelivery
+      tags: [shipments]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          { description: Authorized proof metadata and signed download URL }
+    post:
+      operationId: createProofOfDelivery
+      tags: [shipments]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/CreateProofBody" } },
+          }
+      responses:
+        "201": { description: Delivery recorded transactionally }
+
+  /chat/sessions:
+    get:
+      operationId: listChatSessions
+      tags: [support]
+      responses:
+        "200":
+          {
+            description: Authorized chat sessions,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        type: array,
+                        items: { $ref: "#/components/schemas/ChatSession" },
+                      },
+                  },
+              },
+          }
+    post:
+      operationId: createChatSession
+      tags: [support]
+      responses:
+        "201":
+          {
+            description: Customer chat session,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ChatSession" } },
+              },
+          }
+
+  /chat/sessions/{id}/messages:
+    get:
+      operationId: listChatMessages
+      tags: [support]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          {
+            description: Authorized chat messages,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        type: array,
+                        items: { $ref: "#/components/schemas/ChatMessage" },
+                      },
+                  },
+              },
+          }
+    post:
+      operationId: createChatMessage
+      tags: [support]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [content],
+                    properties: { content: { type: string, maxLength: 2000 } },
+                  },
+              },
+          }
+      responses:
+        "201":
+          {
+            description: Chat message created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ChatMessage" } },
+              },
+          }
+
+  /chat/sessions/{id}/close:
+    patch:
+      operationId: closeChatSession
+      tags: [support]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Chat closed } }
+
+  /chat/guest-sessions:
+    post:
+      operationId: createGuestChatSession
+      tags: [support]
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [guestName, guestEmail],
+                    properties:
+                      {
+                        guestName:
+                          { type: string, minLength: 2, maxLength: 100 },
+                        guestEmail: { type: string, format: email },
+                      },
+                  },
+              },
+          }
+      responses:
+        "201":
+          {
+            description: Guest chat session and expiring bearer token,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: "#/components/schemas/GuestChatSessionResponse" },
+                  },
+              },
+          }
+
+  /chat/guest-sessions/{id}/messages:
+    get:
+      operationId: listGuestChatMessages
+      tags: [support]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - {
+            name: X-Guest-Token,
+            in: header,
+            required: true,
+            schema: { type: string },
+          }
+      responses:
+        "200":
+          {
+            description: Guest chat messages,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        type: array,
+                        items: { $ref: "#/components/schemas/ChatMessage" },
+                      },
+                  },
+              },
+          }
+    post:
+      operationId: createGuestChatMessage
+      tags: [support]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - {
+            name: X-Guest-Token,
+            in: header,
+            required: true,
+            schema: { type: string },
+          }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [content],
+                    properties:
+                      {
+                        content:
+                          { type: string, minLength: 1, maxLength: 2000 },
+                      },
+                  },
+              },
+          }
+      responses:
+        "201":
+          {
+            description: Guest message created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ChatMessage" } },
+              },
+          }
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+        requestId:
+          type: string
+      required: [code, message]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    CurrentUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+          enum: [customer, operator, support, admin]
+        status:
+          type: string
+          enum: [active, restricted, banned]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        emailVerified:
+          type: boolean
+        fullName:
+          type: [string, "null"]
+        phone:
+          type: [string, "null"]
+        company:
+          type: [string, "null"]
+      required:
+        [
+          id,
+          email,
+          role,
+          status,
+          createdAt,
+          updatedAt,
+          emailVerified,
+          fullName,
+          phone,
+          company,
+        ]
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+          enum: [customer, operator, support, admin]
+        status:
+          type: string
+          enum: [active, restricted, banned]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, email, role, status, createdAt]
+
+    UpdateUserBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, restricted, banned]
+        role:
+          type: string
+          enum: [customer, operator, support, admin]
+
+    Shipment:
+      type: object
+      properties:
+        id:
+          type: integer
+        trackingNumber:
+          type: string
+        senderId:
+          type: ["integer", "null"]
+        customerId:
+          type: ["integer", "null"]
+        sourceQuoteId:
+          type: ["integer", "null"]
+        priceCents:
+          type: ["integer", "null"]
+        ownershipNeedsReview:
+          type: boolean
+        senderName:
+          type: ["string", "null"]
+        senderPhone:
+          type: ["string", "null"]
+        senderStreetAddress:
+          type: ["string", "null"]
+        senderHomeAddress:
+          type: ["string", "null"]
+        senderCity:
+          type: ["string", "null"]
+        senderPostalCode:
+          type: ["string", "null"]
+        recipientName:
+          type: string
+        recipientEmail:
+          type: ["string", "null"]
+        recipientPhone:
+          type: ["string", "null"]
+        recipientStreetAddress:
+          type: ["string", "null"]
+        recipientHomeAddress:
+          type: ["string", "null"]
+        recipientCity:
+          type: ["string", "null"]
+        recipientPostalCode:
+          type: ["string", "null"]
+        origin:
+          type: string
+        destination:
+          type: string
+        status:
+          type: string
+          enum:
+            [
+              registered,
+              pending,
+              picked_up,
+              in_transit,
+              customs,
+              on_hold_customs,
+              arrived_at_port,
+              out_for_delivery,
+              delivered,
+              cancelled,
+            ]
+        weightKg:
+          type: ["number", "null"]
+        estimatedDelivery:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - trackingNumber
+        - senderId
+        - customerId
+        - ownershipNeedsReview
+        - recipientName
+        - recipientEmail
+        - origin
+        - destination
+        - status
+        - weightKg
+        - estimatedDelivery
+        - createdAt
+        - updatedAt
+
+    ShipmentPage:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Shipment" } }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+      required: [items, page, pageSize, total]
+
+    CreateShipmentBody:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        senderName:
+          type: ["string", "null"]
+          maxLength: 100
+        senderPhone:
+          type: ["string", "null"]
+          maxLength: 30
+        senderAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        senderStreetAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        senderHomeAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        senderCity:
+          type: ["string", "null"]
+          maxLength: 100
+        senderPostalCode:
+          type: ["string", "null"]
+          maxLength: 30
+        recipientName:
+          type: string
+          minLength: 2
+          maxLength: 100
+        recipientEmail:
+          type: ["string", "null"]
+          format: email
+          maxLength: 254
+        recipientPhone:
+          type: ["string", "null"]
+          maxLength: 30
+        recipientAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        recipientStreetAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        recipientHomeAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        recipientCity:
+          type: ["string", "null"]
+          maxLength: 100
+        recipientPostalCode:
+          type: ["string", "null"]
+          maxLength: 30
+        origin:
+          type: string
+          minLength: 2
+          maxLength: 120
+        destination:
+          type: string
+          minLength: 2
+          maxLength: 120
+        weightKg:
+          type: ["number", "null"]
+        estimatedDelivery:
+          type: ["string", "null"]
+          format: date
+        adminNote:
+          type: ["string", "null"]
+          maxLength: 500
+          description: Optional note from admin appended to the creation SMS
+      required: [customerId, recipientName, origin, destination]
+
+    UpdateShipmentBody:
+      type: object
+      properties:
+        senderName:
+          type: ["string", "null"]
+          maxLength: 100
+        senderPhone:
+          type: ["string", "null"]
+          maxLength: 30
+        senderStreetAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        senderHomeAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        senderCity:
+          type: ["string", "null"]
+          maxLength: 100
+        senderPostalCode:
+          type: ["string", "null"]
+          maxLength: 30
+        recipientName:
+          type: string
+          minLength: 2
+          maxLength: 100
+        recipientEmail:
+          type: ["string", "null"]
+          format: email
+          maxLength: 254
+        recipientPhone:
+          type: ["string", "null"]
+          maxLength: 30
+        recipientStreetAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        recipientHomeAddress:
+          type: ["string", "null"]
+          maxLength: 200
+        recipientCity:
+          type: ["string", "null"]
+          maxLength: 100
+        recipientPostalCode:
+          type: ["string", "null"]
+          maxLength: 30
+        origin:
+          type: string
+          minLength: 2
+          maxLength: 120
+        destination:
+          type: string
+          minLength: 2
+          maxLength: 120
+        status:
+          type: string
+          enum:
+            [
+              registered,
+              pending,
+              picked_up,
+              in_transit,
+              customs,
+              on_hold_customs,
+              arrived_at_port,
+              out_for_delivery,
+              cancelled,
+            ]
+        weightKg:
+          type: ["number", "null"]
+        estimatedDelivery:
+          type: ["string", "null"]
+          format: date
+        adminNote:
+          type: ["string", "null"]
+          maxLength: 500
+          description: Optional note from admin appended to the status-change SMS
+
+    TrackingEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        shipmentId:
+          type: integer
+        location:
+          type: string
+        status:
+          type: string
+        description:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+      required:
+        [id, shipmentId, location, status, description, occurredAt, createdAt]
+
+    CreateTrackingEventBody:
+      type: object
+      properties:
+        location:
+          type: string
+        status:
+          type: string
+          enum:
+            [
+              registered,
+              pending,
+              picked_up,
+              in_transit,
+              customs,
+              on_hold_customs,
+              arrived_at_port,
+              out_for_delivery,
+              cancelled,
+            ]
+        description:
+          type: string
+        occurredAt:
+          type: ["string", "null"]
+          format: date-time
+      required: [location, status, description]
+
+    ContactBody:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        message:
+          type: string
+          minLength: 10
+          maxLength: 2000
+      required: [name, email, message]
+
+    ContactResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+      required: [id, message]
+
+    ContactMessage:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        message: { type: string }
+        status: { type: string, enum: [new, read, replied, closed] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, email, message, status, createdAt, updatedAt]
+
+    ContactMessagePage:
+      type: object
+      properties:
+        items:
+          {
+            type: array,
+            items: { $ref: "#/components/schemas/ContactMessage" },
+          }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+      required: [items, page, pageSize, total]
+
+    ChatSession:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: [integer, "null"] }
+        userEmail: { type: string }
+        guestName: { type: [string, "null"] }
+        status: { type: string, enum: [open, closed] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, userId, userEmail, guestName, status, createdAt, updatedAt]
+
+    ChatMessage:
+      type: object
+      properties:
+        id: { type: integer }
+        sessionId: { type: integer }
+        senderId: { type: [integer, "null"] }
+        senderRole: { type: string }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, sessionId, senderId, senderRole, content, createdAt]
+
+    GuestChatSessionResponse:
+      type: object
+      properties:
+        session: { $ref: "#/components/schemas/ChatSession" }
+        guestToken: { type: string }
+        guestTokenExpiresAt: { type: string, format: date-time }
+      required: [session, guestToken, guestTokenExpiresAt]
+
+    PublicTrackingEvent:
+      type: object
+      description: >
+        A tracking event as returned by the unauthenticated public endpoint.
+        Coordinates (latitude/longitude) are intentionally omitted to prevent
+        precise location intel from being accessible without authentication.
+        Delivery-stage location strings are coarsened to destination city/country.
+      properties:
+        id:
+          type: integer
+        shipmentId:
+          type: integer
+        location:
+          type: string
+        status:
+          type: string
+        description:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        [id, shipmentId, location, status, description, occurredAt, createdAt]
+
+    ShipmentWithTracking:
+      type: object
+      description: >
+        Public shipment tracking data. Intentionally omits recipient identity
+        and precise location coordinates to protect recipient privacy.
+      properties:
+        id:
+          type: integer
+        trackingNumber:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        status:
+          type: string
+          enum:
+            [
+              registered,
+              pending,
+              picked_up,
+              in_transit,
+              customs,
+              on_hold_customs,
+              arrived_at_port,
+              out_for_delivery,
+              delivered,
+              cancelled,
+            ]
+        weightKg:
+          type: ["number", "null"]
+        estimatedDelivery:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicTrackingEvent"
+      required:
+        - id
+        - trackingNumber
+        - origin
+        - destination
+        - status
+        - weightKg
+        - estimatedDelivery
+        - createdAt
+        - updatedAt
+        - events
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        fullName: { type: [string, "null"], minLength: 2, maxLength: 120 }
+        phone: { type: [string, "null"], maxLength: 40 }
+        company: { type: [string, "null"], maxLength: 160 }
+
+    ServiceRate:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string }
+        version: { type: integer }
+        baseFeeCents: { type: integer }
+        perKgCents: { type: integer }
+        fuelPct: { type: number }
+        minWeightKg: { type: number }
+        maxWeightKg: { type: number }
+        transitDaysMin: { type: integer }
+        transitDaysMax: { type: integer }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required:
+        [
+          id,
+          code,
+          name,
+          description,
+          version,
+          baseFeeCents,
+          perKgCents,
+          fuelPct,
+          minWeightKg,
+          maxWeightKg,
+          transitDaysMin,
+          transitDaysMax,
+          active,
+          createdAt,
+        ]
+
+    ServiceRateList:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ServiceRate" }
+      required: [items]
+
+    PriceBreakdown:
+      type: object
+      properties:
+        baseFeeCents: { type: integer }
+        weightFeeCents: { type: integer }
+        fuelSurchargeCents: { type: integer }
+        totalCents: { type: integer }
+        currency: { type: string, enum: [USD] }
+      required:
+        [baseFeeCents, weightFeeCents, fuelSurchargeCents, totalCents, currency]
+
+    RateEstimate:
+      type: object
+      properties:
+        rate: { $ref: "#/components/schemas/ServiceRate" }
+        breakdown: { $ref: "#/components/schemas/PriceBreakdown" }
+      required: [rate, breakdown]
+
+    CreateRateBody:
+      type: object
+      properties:
+        code: { type: string, pattern: "^[a-z0-9-]{2,40}$" }
+        name: { type: string, minLength: 2, maxLength: 80 }
+        description: { type: string, maxLength: 300 }
+        baseFeeCents: { type: integer, minimum: 0 }
+        perKgCents: { type: integer, minimum: 0 }
+        fuelPct: { type: number, minimum: 0, maximum: 100 }
+        minWeightKg: { type: number, exclusiveMinimum: 0 }
+        maxWeightKg: { type: number, exclusiveMinimum: 0 }
+        transitDaysMin: { type: integer, minimum: 0 }
+        transitDaysMax: { type: integer, minimum: 0 }
+      required:
+        [
+          code,
+          name,
+          description,
+          baseFeeCents,
+          perKgCents,
+          fuelPct,
+          minWeightKg,
+          maxWeightKg,
+          transitDaysMin,
+          transitDaysMax,
+        ]
+
+    Quote:
+      type: object
+      properties:
+        devClaimToken:
+          type: string
+          description: Development-only guest quote claim token; never returned in production.
+        id: { type: integer }
+        reference: { type: string }
+        customerId: { type: [integer, "null"] }
+        contactName: { type: string }
+        contactEmail: { type: string, format: email }
+        contactPhone: { type: [string, "null"] }
+        origin: { type: string }
+        destination: { type: string }
+        cargoType: { type: string }
+        weightKg: { type: number }
+        serviceRateId: { type: integer }
+        estimatedPriceCents: { type: integer }
+        finalPriceCents: { type: [integer, "null"] }
+        currency: { type: string, enum: [USD] }
+        status:
+          {
+            type: string,
+            enum:
+              [
+                submitted,
+                under_review,
+                offered,
+                accepted,
+                rejected,
+                expired,
+                converted,
+              ],
+          }
+        validUntil: { type: [string, "null"], format: date-time }
+        convertedShipmentId: { type: [integer, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required:
+        [
+          id,
+          reference,
+          customerId,
+          contactName,
+          contactEmail,
+          contactPhone,
+          origin,
+          destination,
+          cargoType,
+          weightKg,
+          serviceRateId,
+          estimatedPriceCents,
+          finalPriceCents,
+          currency,
+          status,
+          validUntil,
+          convertedShipmentId,
+          createdAt,
+          updatedAt,
+        ]
+
+    QuotePage:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Quote" } }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+      required: [items, page, pageSize, total]
+
+    SubmitQuoteBody:
+      type: object
+      properties:
+        serviceCode: { type: string }
+        contactName: { type: string, minLength: 2, maxLength: 120 }
+        contactEmail: { type: string, format: email }
+        contactPhone: { type: string, maxLength: 40 }
+        origin: { type: string, minLength: 2, maxLength: 200 }
+        destination: { type: string, minLength: 2, maxLength: 200 }
+        cargoType: { type: string, minLength: 2, maxLength: 100 }
+        weightKg: { type: number, exclusiveMinimum: 0 }
+        lengthCm: { type: number, exclusiveMinimum: 0 }
+        widthCm: { type: number, exclusiveMinimum: 0 }
+        heightCm: { type: number, exclusiveMinimum: 0 }
+        notes: { type: string, maxLength: 2000 }
+      required:
+        [
+          serviceCode,
+          contactName,
+          contactEmail,
+          origin,
+          destination,
+          cargoType,
+          weightKg,
+        ]
+
+    ConvertQuoteBody:
+      type: object
+      properties:
+        recipientName: { type: string, minLength: 2, maxLength: 120 }
+        recipientEmail: { type: string, format: email }
+        recipientPhone: { type: string, maxLength: 40 }
+        recipientAddress: { type: string, minLength: 2, maxLength: 300 }
+        estimatedDelivery: { type: string, format: date }
+      required: [recipientName, recipientAddress]
+
+    Notification:
+      type: object
+      properties:
+        id: { type: integer }
+        type: { type: string }
+        title: { type: string }
+        message: { type: string }
+        href: { type: [string, "null"] }
+        readAt: { type: [string, "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+      required: [id, type, title, message, href, readAt, createdAt]
+
+    NotificationPage:
+      type: object
+      properties:
+        items:
+          { type: array, items: { $ref: "#/components/schemas/Notification" } }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+        unread: { type: integer }
+      required: [items, page, pageSize, total, unread]
+
+    PresignUploadBody:
+      type: object
+      properties:
+        shipmentId: { type: integer }
+        fileName: { type: string, maxLength: 180 }
+        contentType:
+          {
+            type: string,
+            enum: [image/jpeg, image/png, image/webp, application/pdf],
+          }
+        size: { type: integer, minimum: 1, maximum: 10485760 }
+      required: [shipmentId, fileName, contentType, size]
+
+    CreateProofBody:
+      type: object
+      properties:
+        recipientName: { type: string, minLength: 2, maxLength: 120 }
+        deliveredAt: { type: string, format: date-time }
+        notes: { type: string, maxLength: 2000 }
+        objectKey: { type: string }
+        originalFileName: { type: string }
+        contentType:
+          {
+            type: string,
+            enum: [image/jpeg, image/png, image/webp, application/pdf],
+          }
+        fileSize: { type: integer, minimum: 1, maximum: 10485760 }
+      required:
+        [
+          recipientName,
+          deliveredAt,
+          objectKey,
+          originalFileName,
+          contentType,
+          fileSize,
+        ]

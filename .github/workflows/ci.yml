@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: shiprion_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shiprion_test
+      SESSION_SECRET: ci-session-secret-that-is-longer-than-thirty-two-characters
+      APP_ORIGIN: http://localhost:5173
+      PORT: 8080
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @workspace/db migrate
+      - run: corepack pnpm --filter @workspace/api-spec codegen
+      - run: corepack pnpm run ci
+      - run: corepack pnpm audit --prod --audit-level high
+      - run: corepack pnpm exec playwright install --with-deps chromium
+      - name: Start private object-storage test service
+        run: |
+          docker run -d --name shiprion-minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=shiprion-e2e \
+            -e MINIO_ROOT_PASSWORD=shiprion-minio-password \
+            minio/minio server /data
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:9000/minio/health/live && break
+            sleep 1
+          done
+          docker run --rm --network host --entrypoint /bin/sh minio/mc -c \
+            "mc alias set local http://127.0.0.1:9000 shiprion-e2e shiprion-minio-password && mc mb --ignore-existing local/shiprion-e2e"
+      - name: Browser workflows
+        run: corepack pnpm run test:e2e
+        env:
+          E2E_FULL: "true"
+          E2E_BASE_URL: http://127.0.0.1:5173
+          SEED_ADMIN_EMAIL: admin@example.com
+          SEED_ADMIN_PASSWORD: Admin-E2E-Password!1
+          SEED_CUSTOMER_PASSWORD: Customer-E2E-Password!1
+          S3_BUCKET: shiprion-e2e
+          S3_REGION: us-east-1
+          S3_ENDPOINT: http://127.0.0.1:9000
+          S3_ACCESS_KEY_ID: shiprion-e2e
+          S3_SECRET_ACCESS_KEY: shiprion-minio-password
+          S3_FORCE_PATH_STYLE: "true"

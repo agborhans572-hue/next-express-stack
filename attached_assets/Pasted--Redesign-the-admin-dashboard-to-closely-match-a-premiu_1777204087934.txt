@@ -1,0 +1,66 @@
+"Redesign the admin dashboard to closely match a premium modern logistics dashboard UI with a dark theme, glassmorphism, and gradient cards exactly like high-end SaaS analytics panels.
+
+Create a full-screen layout with a left vertical sidebar (fixed) using circular icon buttons stacked vertically with soft glow hover effects and active state highlight. No text labels in sidebar, only icons.
+
+Add a top navigation bar with:
+- A rounded search input in the center
+- A date pill (e.g. 'Today, 15 Sep, 2025')
+- Notification bell icon
+- Circular user avatar on the right
+
+Main dashboard layout should be a responsive grid with rounded cards, soft shadows, and subtle gradient backgrounds.
+
+Top section:
+Create 4 statistic cards with:
+- Rounded corners
+- Gradient backgrounds (dark + subtle neon glow)
+- Small icons
+- Large numbers (e.g. 275, 1.3k, 5.7k, $5.3m)
+- Small percentage indicators in green/red at top right
+
+Right side of top section:
+Create a large 'Live Fleet Location' card:
+- Dark map-style background (no real map required initially)
+- Floating colored location dots/icons (truck, plane, ship)
+- Dotted route line across the map
+- A floating shipment info card on the right showing:
+  - Tracking number
+  - Status steps (Packaging, In Transit, Out for Delivery, Delivered)
+  - Highlight current step
+
+Bottom left:
+Create 'Shipment List' card:
+- List layout with origin → destination
+- City names bold (e.g. New York → Los Angeles)
+- Small metadata (date, company)
+- Status badges (green = delivered, orange = pending)
+
+Bottom middle:
+Create 'Revenue Trends' chart:
+- Use bar chart with multiple colors (blue, orange, green)
+- Smooth rounded bars
+- Dark background with subtle grid
+
+Bottom right:
+Create 'Fleet Status' card:
+- Show 3 metrics (Efficiency, Fuel, Maintenance)
+- Each with percentage (68%, 91%, 83%)
+- Horizontal progress bars with gradient fill
+
+Design rules (STRICT):
+- Use Tailwind CSS only
+- Dark background (#0f1117 or similar)
+- Cards must have rounded-xl or rounded-2xl
+- Use soft shadows + inner glow
+- Use gradients (blue, purple, orange accents)
+- Spacing must be consistent and breathable
+- No sharp edges or plain white sections
+- UI must look premium, minimal, and futuristic
+
+Add smooth hover effects and transitions on all cards and sidebar icons.
+
+Make layout responsive:
+- Sidebar collapses on mobile
+- Grid stacks properly on smaller screens
+
+Do NOT simplify the design. Match spacing, structure, and visual hierarchy as close as possible to a modern SaaS logistics dashboard UI."

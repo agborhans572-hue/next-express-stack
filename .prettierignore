@@ -1,0 +1,16 @@
+node_modules
+.cache
+.config
+.local
+.agents
+attached_assets
+**/dist
+**/*.tsbuildinfo
+**/.generated
+lib/api-client-react/src/generated
+lib/api-zod/src/generated
+artifacts/mockup-sandbox
+pnpm-lock.yaml
+test-results
+playwright-report
+public

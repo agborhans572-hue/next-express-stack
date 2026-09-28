@@ -1,0 +1,29 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "preinstall": "node ./scripts/ensure-pnpm.mjs",
+    "dev": "corepack pnpm --parallel --stream --filter @workspace/api-server --filter @workspace/frontend run dev",
+    "start": "corepack pnpm --filter @workspace/api-server run start",
+    "prebuild": "corepack pnpm --filter @workspace/api-spec run codegen",
+    "build": "corepack pnpm run typecheck && corepack pnpm -r --if-present run build",
+    "vercel-build": "corepack pnpm run build",
+    "test": "corepack pnpm -r --if-present run test",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "format:check": "prettier --check . --ignore-path .prettierignore",
+    "ci": "corepack pnpm run format:check && corepack pnpm run lint && corepack pnpm run typecheck && corepack pnpm run test && corepack pnpm run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "corepack pnpm run typecheck:libs && corepack pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck && tsc -p tsconfig.vercel.json --noEmit"
+  },
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "catalog:",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.44.1"
+  }
+}
