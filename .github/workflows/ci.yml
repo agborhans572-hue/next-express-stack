@@ -40,16 +40,19 @@ jobs:
       - run: corepack pnpm exec playwright install --with-deps chromium
       - name: Start private object-storage test service
         run: |
-          docker run -d --name shiprion-minio -p 9000:9000 \
-            -e MINIO_ROOT_USER=shiprion-e2e \
-            -e MINIO_ROOT_PASSWORD=shiprion-minio-password \
-            minio/minio server /data
+          python -m pip install 'moto[server,s3]==5.2.3'
+          moto_server -H 0.0.0.0 -p 9000 >/tmp/shiprion-moto.log 2>&1 &
           for attempt in {1..30}; do
-            curl --fail --silent http://127.0.0.1:9000/minio/health/live && break
+            if curl --fail --silent http://127.0.0.1:9000/moto-api/; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              cat /tmp/shiprion-moto.log
+              exit 1
+            fi
             sleep 1
           done
-          docker run --rm --network host --entrypoint /bin/sh minio/mc -c \
-            "mc alias set local http://127.0.0.1:9000 shiprion-e2e shiprion-minio-password && mc mb --ignore-existing local/shiprion-e2e"
+          python -c "import boto3; boto3.client('s3', endpoint_url='http://127.0.0.1:9000', aws_access_key_id='shiprion-e2e', aws_secret_access_key='shiprion-minio-password', region_name='us-east-1').create_bucket(Bucket='shiprion-e2e')"
       - name: Browser workflows
         run: corepack pnpm run test:e2e
         env:
