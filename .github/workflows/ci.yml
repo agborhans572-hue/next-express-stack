@@ -70,10 +70,42 @@ jobs:
                       raise
                   time.sleep(1)
           PY
+      - name: Start application test servers
+        run: |
+          corepack pnpm --filter @workspace/api-server seed
+          setsid corepack pnpm --filter @workspace/api-server start >/tmp/shiprion-api.log 2>&1 &
+          echo $! >/tmp/shiprion-api.pid
+          setsid corepack pnpm --filter @workspace/frontend dev >/tmp/shiprion-frontend.log 2>&1 &
+          echo $! >/tmp/shiprion-frontend.pid
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8080/api/healthz >/dev/null && curl --fail --silent http://127.0.0.1:5173 >/dev/null; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              cat /tmp/shiprion-api.log
+              cat /tmp/shiprion-frontend.log
+              exit 1
+            fi
+            sleep 1
+          done
+        env:
+          E2E_BASE_URL: http://127.0.0.1:5173
+          SEED_DEVELOPMENT: "true"
+          SEED_ADMIN_EMAIL: admin@example.com
+          SEED_ADMIN_PASSWORD: Admin-E2E-Password!1
+          SEED_CUSTOMER_PASSWORD: Customer-E2E-Password!1
+          S3_BUCKET: shiprion-e2e
+          S3_REGION: us-east-1
+          S3_ENDPOINT: http://127.0.0.1:9000
+          S3_ACCESS_KEY_ID: shiprion-e2e
+          S3_SECRET_ACCESS_KEY: shiprion-minio-password
+          S3_FORCE_PATH_STYLE: "true"
       - name: Browser workflows
         run: corepack pnpm run test:e2e
+        timeout-minutes: 10
         env:
           E2E_FULL: "true"
+          E2E_EXTERNAL_SERVERS: "true"
           E2E_BASE_URL: http://127.0.0.1:5173
           SEED_ADMIN_EMAIL: admin@example.com
           SEED_ADMIN_PASSWORD: Admin-E2E-Password!1
@@ -84,3 +116,19 @@ jobs:
           S3_ACCESS_KEY_ID: shiprion-e2e
           S3_SECRET_ACCESS_KEY: shiprion-minio-password
           S3_FORCE_PATH_STYLE: "true"
+      - name: Stop application test servers
+        if: always()
+        run: |
+          if [ -f /tmp/shiprion-api.pid ]; then kill -- -"$(cat /tmp/shiprion-api.pid)" || true; fi
+          if [ -f /tmp/shiprion-frontend.pid ]; then kill -- -"$(cat /tmp/shiprion-frontend.pid)" || true; fi
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-diagnostics
+          path: |
+            playwright-report
+            test-results
+            /tmp/shiprion-api.log
+            /tmp/shiprion-frontend.log
+          if-no-files-found: ignore
