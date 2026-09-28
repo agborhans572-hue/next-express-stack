@@ -12,19 +12,33 @@ if (!Number.isInteger(port) || port <= 0)
     `PORT must be a positive integer; received "${process.env.PORT ?? ""}".`,
   );
 const httpServer = createServer(app);
+let socketServer: ReturnType<typeof initSocketIO> | undefined;
+let shuttingDown = false;
 
 async function start(): Promise<void> {
   await migrateDatabase();
-  initSocketIO(httpServer, sessionMiddleware);
+  socketServer = initSocketIO(httpServer, sessionMiddleware);
   await verifyTransporter();
   startOutboxWorker();
   httpServer.listen(port, () => logger.info({ port }, "Server listening"));
 }
 
 async function shutdown(signal: string): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
   logger.info({ signal }, "Graceful shutdown started");
   stopOutboxWorker();
-  await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+  const activeSocketServer = socketServer;
+  if (activeSocketServer) {
+    await new Promise<void>((resolve) =>
+      activeSocketServer.close(() => resolve()),
+    );
+  }
+  if (httpServer.listening) {
+    await new Promise<void>((resolve, reject) =>
+      httpServer.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
   await pool.end();
   process.exit(0);
 }
