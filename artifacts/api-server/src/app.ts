@@ -14,6 +14,7 @@ import { logger } from "./lib/logger";
 import { sessionStore } from "./lib/session-store";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+import { validateVercelR2Environment } from "./lib/storage";
 
 const app: Express = express();
 
@@ -95,9 +96,11 @@ if (process.env.NODE_ENV === "production") {
     "FROM_EMAIL",
     "SUPPORT_EMAIL",
     "S3_BUCKET",
+    "S3_REGION",
     "S3_ENDPOINT",
     "S3_ACCESS_KEY_ID",
     "S3_SECRET_ACCESS_KEY",
+    "S3_FORCE_PATH_STYLE",
     ...(process.env.VERCEL ? ["CRON_SECRET"] : []),
   ] as const;
   const missing = required.filter((name) => !process.env[name]);
@@ -118,6 +121,8 @@ if (process.env.NODE_ENV === "production") {
     );
   if (process.env.VERCEL && process.env.CRON_SECRET!.length < 16)
     throw new Error("CRON_SECRET must contain at least 16 characters.");
+
+  validateVercelR2Environment(process.env);
 }
 
 export const sessionMiddleware: RequestHandler = session({

@@ -4,14 +4,14 @@ import * as schema from "./schema";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "node:path";
 import { existsSync } from "node:fs";
+import {
+  validateMigrationDatabaseUrl,
+  validateRuntimeDatabaseEnvironment,
+} from "./config";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
+const runtimeDatabaseUrl = validateRuntimeDatabaseEnvironment(process.env);
 
 function parsePoolMaximum(): number {
   const raw =
@@ -24,12 +24,12 @@ function parsePoolMaximum(): number {
 }
 
 /**
- * Vercel instances must keep their local pool deliberately small. Supabase's
- * transaction pooler performs the cross-instance pooling; opening a large pg
+ * Vercel instances must keep their local pool deliberately small. Neon's
+ * pooler performs the cross-instance pooling; opening a large pg
  * pool in every function instance would multiply connections during scale-out.
  */
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: runtimeDatabaseUrl.toString(),
   max: parsePoolMaximum(),
   idleTimeoutMillis: process.env.VERCEL ? 5_000 : 30_000,
   connectionTimeoutMillis: 10_000,
@@ -61,6 +61,8 @@ export async function migrateDatabase(
 ): Promise<void> {
   if (!connectionString)
     throw new Error("A migration database URL is required.");
+
+  validateMigrationDatabaseUrl(process.env.MIGRATION_DATABASE_URL);
 
   if (connectionString === process.env.DATABASE_URL) {
     await migrate(db, { migrationsFolder });

@@ -15,6 +15,27 @@ const allowedTypes = new Set([
 ]);
 export const MAX_POD_FILE_SIZE = 10 * 1024 * 1024;
 
+export function validateVercelR2Environment(env: NodeJS.ProcessEnv): void {
+  if (!env.VERCEL) return;
+  let endpoint: URL;
+  try {
+    endpoint = new URL(env.S3_ENDPOINT ?? "");
+  } catch {
+    throw new Error("S3_ENDPOINT must be a valid HTTPS URL.");
+  }
+  if (
+    endpoint.protocol !== "https:" ||
+    !endpoint.hostname.endsWith(".r2.cloudflarestorage.com")
+  )
+    throw new Error(
+      "Vercel S3_ENDPOINT must use the Cloudflare R2 HTTPS endpoint.",
+    );
+  if (env.S3_REGION !== "auto")
+    throw new Error("Cloudflare R2 requires S3_REGION=auto.");
+  if (env.S3_FORCE_PATH_STYLE !== "false")
+    throw new Error("Cloudflare R2 requires S3_FORCE_PATH_STYLE=false.");
+}
+
 function bucket(): string {
   if (!process.env.S3_BUCKET) throw new Error("S3_BUCKET is not configured");
   return process.env.S3_BUCKET;
