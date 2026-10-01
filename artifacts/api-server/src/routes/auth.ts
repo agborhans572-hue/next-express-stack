@@ -461,10 +461,7 @@ router.post(
             .where(
               and(
                 eq(emailOutboxTable.toEmail, user.email),
-                eq(
-                  emailOutboxTable.subject,
-                  "Shiprion - Reset your password",
-                ),
+                eq(emailOutboxTable.subject, "Shiprion - Reset your password"),
                 eq(emailOutboxTable.status, "pending"),
               ),
             );
