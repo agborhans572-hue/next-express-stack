@@ -9,6 +9,17 @@ out-tsc
 .expo
 .expo-shared
 
+# Vite's application-owned public assets are source files. Keep the generated
+# repository-root /public output ignored, but commit the frontend source assets
+# that Vite copies into it during deployment. PNG/JPEG source exports are
+# retained locally as design masters; production uses their optimized WebP
+# equivalents (plus the explicitly retained Open Graph image).
+!/artifacts/frontend/public/
+!/artifacts/frontend/public/**
+/artifacts/frontend/public/**/*.png
+/artifacts/frontend/public/*.jpeg
+/artifacts/frontend/public/hero-ref.jpg
+
 # dependencies
 node_modules
 
