@@ -14,6 +14,19 @@ type ClaimedMessage = {
   attempts: number;
 };
 
+async function claimMessage(id: number): Promise<ClaimedMessage | undefined> {
+  const result = await pool.query<ClaimedMessage>(
+    `
+      UPDATE email_outbox
+      SET status = 'processing', next_attempt_at = now() + interval '5 minutes'
+      WHERE id = $1 AND status = 'pending' AND next_attempt_at <= now()
+      RETURNING id, to_email AS "toEmail", subject, html, attempts
+    `,
+    [id],
+  );
+  return result.rows[0];
+}
+
 async function claimBatch(): Promise<ClaimedMessage[]> {
   await pool.query(
     "UPDATE email_outbox SET status = 'pending' WHERE status = 'processing' AND next_attempt_at <= now()",
@@ -44,6 +57,70 @@ export type OutboxBatchResult = {
   skipped: boolean;
 };
 
+async function deliverClaimedMessage(
+  message: ClaimedMessage,
+): Promise<"sent" | "failed"> {
+  try {
+    await sendRawEmail(message.toEmail, message.subject, message.html);
+    await db
+      .update(emailOutboxTable)
+      .set({ status: "sent", sentAt: new Date(), lastError: null })
+      .where(
+        and(
+          eq(emailOutboxTable.id, message.id),
+          eq(emailOutboxTable.status, "processing"),
+        ),
+      );
+    return "sent";
+  } catch (error) {
+    const attempts = message.attempts + 1;
+    await db
+      .update(emailOutboxTable)
+      .set({
+        attempts,
+        status: attempts >= 5 ? "failed" : "pending",
+        lastError:
+          error instanceof Error
+            ? error.message.slice(0, 500)
+            : "Unknown email error",
+        nextAttemptAt: new Date(
+          Date.now() + Math.min(60, 2 ** attempts) * 60_000,
+        ),
+      })
+      .where(
+        and(
+          eq(emailOutboxTable.id, message.id),
+          eq(emailOutboxTable.status, "processing"),
+        ),
+      );
+    logger.error(
+      { outboxId: message.id, attempts, error },
+      "Email outbox delivery failed",
+    );
+    return "failed";
+  }
+}
+
+/**
+ * Delivers a specific newly queued message during an interactive request.
+ * The database claim keeps this safe when a cron worker is running at the
+ * same time, and a failed delivery remains queued for the normal retry path.
+ */
+export async function processOutboxMessage(
+  id: number,
+): Promise<OutboxBatchResult> {
+  const message = await claimMessage(id);
+  if (!message) return { claimed: 0, sent: 0, failed: 0, skipped: true };
+
+  const delivery = await deliverClaimedMessage(message);
+  return {
+    claimed: 1,
+    sent: delivery === "sent" ? 1 : 0,
+    failed: delivery === "failed" ? 1 : 0,
+    skipped: false,
+  };
+}
+
 export async function processOutboxBatch(): Promise<OutboxBatchResult> {
   if (running) return { claimed: 0, sent: 0, failed: 0, skipped: true };
   running = true;
@@ -57,45 +134,8 @@ export async function processOutboxBatch(): Promise<OutboxBatchResult> {
     const messages = await claimBatch();
     result.claimed = messages.length;
     for (const message of messages) {
-      try {
-        await sendRawEmail(message.toEmail, message.subject, message.html);
-        await db
-          .update(emailOutboxTable)
-          .set({ status: "sent", sentAt: new Date(), lastError: null })
-          .where(
-            and(
-              eq(emailOutboxTable.id, message.id),
-              eq(emailOutboxTable.status, "processing"),
-            ),
-          );
-        result.sent += 1;
-      } catch (error) {
-        result.failed += 1;
-        const attempts = message.attempts + 1;
-        await db
-          .update(emailOutboxTable)
-          .set({
-            attempts,
-            status: attempts >= 5 ? "failed" : "pending",
-            lastError:
-              error instanceof Error
-                ? error.message.slice(0, 500)
-                : "Unknown email error",
-            nextAttemptAt: new Date(
-              Date.now() + Math.min(60, 2 ** attempts) * 60_000,
-            ),
-          })
-          .where(
-            and(
-              eq(emailOutboxTable.id, message.id),
-              eq(emailOutboxTable.status, "processing"),
-            ),
-          );
-        logger.error(
-          { outboxId: message.id, attempts, error },
-          "Email outbox delivery failed",
-        );
-      }
+      const delivery = await deliverClaimedMessage(message);
+      result[delivery] += 1;
     }
     return result;
   } finally {

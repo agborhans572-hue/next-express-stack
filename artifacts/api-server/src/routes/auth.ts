@@ -18,6 +18,7 @@ import {
   hashToken,
 } from "../lib/security";
 import { persistentRateLimit } from "../lib/rate-limit";
+import { processOutboxMessage } from "../lib/outbox";
 import { requireAuth } from "../middleware/auth";
 
 const router: IRouter = Router();
@@ -73,7 +74,7 @@ async function createVerificationToken(
   email: string,
 ): Promise<string> {
   const code = String(randomInt(100000, 1000000));
-  await db.transaction(async (tx) => {
+  const outboxId = await db.transaction(async (tx) => {
     await tx
       .delete(authTokensTable)
       .where(
@@ -89,12 +90,17 @@ async function createVerificationToken(
       tokenHash: hashToken(code),
       expiresAt: new Date(Date.now() + 10 * 60_000),
     });
-    await tx.insert(emailOutboxTable).values({
-      toEmail: email,
-      subject: "Shiprion - Verify your email",
-      html: `<div style="font-family:sans-serif"><h2>Verify your email address</h2><p>Enter this code in Shiprion:</p><p style="font-size:28px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p><p>This code expires in 10 minutes.</p></div>`,
-    });
+    const [message] = await tx
+      .insert(emailOutboxTable)
+      .values({
+        toEmail: email,
+        subject: "Shiprion - Verify your email",
+        html: `<div style="font-family:sans-serif"><h2>Verify your email address</h2><p>Enter this code in Shiprion:</p><p style="font-size:28px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p><p>This code expires in 10 minutes.</p></div>`,
+      })
+      .returning({ id: emailOutboxTable.id });
+    return message!.id;
   });
+  await processOutboxMessage(outboxId);
   return code;
 }
 
@@ -417,7 +423,7 @@ router.post(
         const url = appUrl(
           `/reset-password?token=${encodeURIComponent(token)}`,
         );
-        await db.transaction(async (tx) => {
+        const outboxId = await db.transaction(async (tx) => {
           await tx.insert(authTokensTable).values({
             userId: user.id,
             email: user.email,
@@ -425,12 +431,17 @@ router.post(
             tokenHash: hash,
             expiresAt: new Date(Date.now() + 30 * 60_000),
           });
-          await tx.insert(emailOutboxTable).values({
-            toEmail: user.email,
-            subject: "Shiprion - Reset your password",
-            html: `<div style="font-family:sans-serif"><h2>Reset your password</h2><p>This link expires in 30 minutes.</p><p><a href="${escapeHtml(url)}">Reset password</a></p></div>`,
-          });
+          const [message] = await tx
+            .insert(emailOutboxTable)
+            .values({
+              toEmail: user.email,
+              subject: "Shiprion - Reset your password",
+              html: `<div style="font-family:sans-serif"><h2>Reset your password</h2><p>This link expires in 30 minutes.</p><p><a href="${escapeHtml(url)}">Reset password</a></p></div>`,
+            })
+            .returning({ id: emailOutboxTable.id });
+          return message!.id;
         });
+        await processOutboxMessage(outboxId);
       }
     }
     res.json({
