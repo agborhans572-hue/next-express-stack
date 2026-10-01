@@ -46,7 +46,16 @@ const profileSchema = z.object({
 
 const authLimit = persistentRateLimit("auth", 20, 15 * 60_000);
 const registerLimit = persistentRateLimit("register", 5, 60 * 60_000);
-const resetLimit = persistentRateLimit("password-reset", 5, 60 * 60_000);
+const forgotPasswordLimit = persistentRateLimit(
+  "forgot-password",
+  5,
+  60 * 60_000,
+);
+const resetPasswordLimit = persistentRateLimit(
+  "reset-password",
+  10,
+  60 * 60_000,
+);
 
 function serializeUser(user: User) {
   return {
@@ -81,6 +90,15 @@ async function createVerificationToken(
         and(
           eq(authTokensTable.userId, userId),
           eq(authTokensTable.type, "email_verification"),
+        ),
+      );
+    await tx
+      .delete(emailOutboxTable)
+      .where(
+        and(
+          eq(emailOutboxTable.toEmail, email),
+          eq(emailOutboxTable.subject, "Shiprion - Verify your email"),
+          eq(emailOutboxTable.status, "pending"),
         ),
       );
     await tx.insert(authTokensTable).values({
@@ -408,7 +426,7 @@ router.post(
 
 router.post(
   "/auth/forgot-password",
-  resetLimit,
+  forgotPasswordLimit,
   async (req, res): Promise<void> => {
     const parsed = z.object({ email: emailSchema }).safeParse(req.body);
     let developmentResetToken: string | undefined;
@@ -430,6 +448,26 @@ router.post(
           `/reset-password?token=${encodeURIComponent(token)}`,
         );
         const outboxId = await db.transaction(async (tx) => {
+          await tx
+            .delete(authTokensTable)
+            .where(
+              and(
+                eq(authTokensTable.userId, user.id),
+                eq(authTokensTable.type, "password_reset"),
+              ),
+            );
+          await tx
+            .delete(emailOutboxTable)
+            .where(
+              and(
+                eq(emailOutboxTable.toEmail, user.email),
+                eq(
+                  emailOutboxTable.subject,
+                  "Shiprion - Reset your password",
+                ),
+                eq(emailOutboxTable.status, "pending"),
+              ),
+            );
           await tx.insert(authTokensTable).values({
             userId: user.id,
             email: user.email,
@@ -462,7 +500,7 @@ router.post(
 
 router.post(
   "/auth/reset-password",
-  resetLimit,
+  resetPasswordLimit,
   async (req, res): Promise<void> => {
     const parsed = z
       .object({ token: z.string().min(20).max(200), password: passwordSchema })
