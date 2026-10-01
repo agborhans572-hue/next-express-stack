@@ -128,6 +128,12 @@ router.post(
       .from(usersTable)
       .where(eq(usersTable.email, email));
     if (existing) {
+      // Registration is intentionally idempotent. A customer may retry after
+      // an SMTP or deployment problem, so issue a fresh code for an existing
+      // unverified account while keeping the same enumeration-safe response.
+      if (!existing.emailVerified) {
+        await createVerificationToken(existing.id, existing.email);
+      }
       res.status(201).json({
         message:
           "If this address can be registered, a verification email has been sent.",
