@@ -903,3 +903,493 @@
     animation: none !important;
   }
 }
+
+/* ─── Freight hero / dimensional product scene ─────────────────────── */
+.shiprion-hero {
+  --hero-ink: #18302e;
+  --hero-acid: #bdcf3e;
+}
+
+.hero-ambient {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+.hero-ambient-one {
+  width: min(62vw, 980px);
+  height: min(62vw, 980px);
+  right: -15%;
+  top: -24%;
+  background: radial-gradient(
+    circle,
+    rgb(219 234 130 / 0.46) 0%,
+    rgb(226 235 178 / 0.2) 42%,
+    transparent 72%
+  );
+}
+
+.hero-ambient-two {
+  width: min(34vw, 520px);
+  height: min(34vw, 520px);
+  left: -10%;
+  bottom: -20%;
+  background: radial-gradient(
+    circle,
+    rgb(255 255 255 / 0.9) 0%,
+    transparent 70%
+  );
+}
+
+.hero-route-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: radial-gradient(
+    circle at center,
+    rgb(24 48 46 / 0.27) 1px,
+    transparent 1.5px
+  );
+  background-size: 28px 28px;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 38%,
+    black 73%,
+    transparent 100%
+  );
+}
+
+.hero-visual-stage {
+  --hero-x: 0;
+  --hero-y: 0;
+  perspective: 1300px;
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.hero-visual-stage::before {
+  content: "";
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  right: 3%;
+  top: 12%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 42% 38%,
+    rgb(255 255 255 / 0.9),
+    rgb(225 234 173 / 0.48) 48%,
+    transparent 72%
+  );
+  box-shadow: inset 0 0 0 1px rgb(24 48 46 / 0.06);
+}
+
+.hero-orbit {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid rgb(24 48 46 / 0.16);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-orbit-outer {
+  width: 94%;
+  height: 49%;
+  right: -5%;
+  top: 22%;
+  transform: rotate(-15deg)
+    translate3d(
+      calc(var(--hero-x) * -8px),
+      calc(var(--hero-y) * -8px),
+      -30px
+    );
+}
+
+.hero-orbit-inner {
+  width: 68%;
+  height: 35%;
+  right: 7%;
+  top: 30%;
+  border-style: dashed;
+  transform: rotate(18deg)
+    translate3d(
+      calc(var(--hero-x) * -15px),
+      calc(var(--hero-y) * -15px),
+      20px
+    );
+}
+
+.hero-map-dot {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #f4f1e8;
+  border-radius: 50%;
+  background: var(--hero-acid);
+  box-shadow: 0 0 0 5px rgb(189 207 62 / 0.2);
+  animation: hero-map-pulse 2.6s ease-in-out infinite;
+}
+
+.hero-map-dot-one {
+  top: 24%;
+  right: 19%;
+}
+
+.hero-map-dot-two {
+  top: 45%;
+  left: 17%;
+  animation-delay: -0.9s;
+}
+
+.hero-map-dot-three {
+  top: 61%;
+  right: 7%;
+  animation-delay: -1.8s;
+}
+
+.hero-ship-layer {
+  position: absolute;
+  top: 4%;
+  right: -10%;
+  z-index: 3;
+  width: 94%;
+  transform: translate3d(
+      calc(var(--hero-x) * -32px),
+      calc(var(--hero-y) * -22px),
+      -10px
+    )
+    rotateY(calc(var(--hero-x) * -2deg))
+    rotateX(calc(var(--hero-y) * 1.5deg));
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  filter: drop-shadow(0 24px 20px rgb(24 48 46 / 0.2));
+}
+
+.hero-ship-float {
+  animation: hero-ship-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-truck-layer {
+  position: absolute;
+  right: -16%;
+  bottom: 2%;
+  z-index: 8;
+  width: 116%;
+  transform: translate3d(
+      calc(var(--hero-x) * 42px),
+      calc(var(--hero-y) * 28px),
+      70px
+    )
+    rotateY(calc(var(--hero-x) * 2.2deg))
+    rotateX(calc(var(--hero-y) * -1.4deg));
+  transform-origin: center bottom;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  filter: drop-shadow(0 28px 24px rgb(24 48 46 / 0.22));
+}
+
+.hero-truck-drive {
+  animation: hero-truck-drive 5.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-road-plane {
+  position: absolute;
+  z-index: 5;
+  right: -12%;
+  bottom: 1%;
+  width: 113%;
+  height: 25%;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 52% 48% 18% 18%;
+  clip-path: polygon(8% 23%, 97% 2%, 100% 78%, 0 100%);
+  background:
+    linear-gradient(90deg, transparent 47%, rgb(223 239 89 / 0.85) 47% 48.2%, transparent 48.2%),
+    linear-gradient(160deg, #294541 0%, #132a28 70%);
+  box-shadow:
+    0 28px 50px rgb(24 48 46 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.15);
+  transform: perspective(760px) rotateX(57deg) rotateZ(-4deg)
+    translate3d(
+      calc(var(--hero-x) * 18px),
+      calc(var(--hero-y) * 10px),
+      0
+    );
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-road-plane::before,
+.hero-road-plane::after,
+.hero-road-plane span {
+  content: "";
+  position: absolute;
+  width: 15%;
+  height: 3px;
+  top: 58%;
+  background: rgb(255 255 255 / 0.78);
+  transform: skewX(-24deg);
+  animation: hero-road-flow 2s linear infinite;
+}
+
+.hero-road-plane::before {
+  left: -8%;
+}
+
+.hero-road-plane::after {
+  left: 21%;
+}
+
+.hero-road-plane span:nth-child(1) {
+  left: 50%;
+}
+
+.hero-road-plane span:nth-child(2) {
+  left: 79%;
+}
+
+.hero-road-plane span:nth-child(3) {
+  left: 108%;
+}
+
+.hero-status-card {
+  position: absolute;
+  z-index: 14;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.72);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.74);
+  box-shadow: 0 18px 48px rgb(24 48 46 / 0.12);
+  backdrop-filter: blur(18px);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-status-ship {
+  top: 15%;
+  left: 1%;
+  padding: 0.75rem 0.9rem;
+  transform: translate3d(
+      calc(var(--hero-x) * -52px),
+      calc(var(--hero-y) * -32px),
+      100px
+    )
+    rotate(-2deg);
+}
+
+.hero-status-truck {
+  right: 0;
+  bottom: 13%;
+  padding: 0.75rem 0.9rem;
+  transform: translate3d(
+    calc(var(--hero-x) * 58px),
+    calc(var(--hero-y) * 35px),
+    120px
+  );
+}
+
+.hero-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #58a859;
+  box-shadow: 0 0 0 5px rgb(88 168 89 / 0.16);
+  animation: hero-map-pulse 1.8s ease-in-out infinite;
+}
+
+.hero-scene-label {
+  position: absolute;
+  right: 3%;
+  top: 3%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgb(24 48 46 / 0.52);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-bottom-line {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    #18302e 0%,
+    #18302e 32%,
+    #bdcf3e 32%,
+    #bdcf3e 68%,
+    #18302e 68%,
+    #18302e 100%
+  );
+}
+
+@keyframes hero-ship-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.15deg);
+  }
+  48% {
+    transform: translate3d(-12px, -9px, 0) rotate(0.35deg);
+  }
+  72% {
+    transform: translate3d(-5px, -4px, 0) rotate(0.05deg);
+  }
+}
+
+@keyframes hero-truck-drive {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  45% {
+    transform: translate3d(-14px, -3px, 0) rotate(-0.12deg);
+  }
+  52% {
+    transform: translate3d(-16px, -1px, 0) rotate(0.08deg);
+  }
+  60% {
+    transform: translate3d(-13px, -3px, 0) rotate(-0.06deg);
+  }
+}
+
+@keyframes hero-road-flow {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -193% 0;
+  }
+}
+
+@keyframes hero-map-pulse {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 0.82;
+    opacity: 0.62;
+  }
+}
+
+@media (max-width: 1023px) {
+  .hero-route-grid {
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 48%,
+      black 74%,
+      transparent 100%
+    );
+  }
+
+  .hero-visual-stage::before {
+    width: 75%;
+    right: 8%;
+    top: 8%;
+  }
+
+  .hero-ship-layer {
+    right: -8%;
+    width: 94%;
+  }
+
+  .hero-truck-layer {
+    right: -12%;
+    width: 112%;
+  }
+}
+
+@media (max-width: 639px) {
+  .hero-ambient-one {
+    top: 42%;
+    right: -32%;
+    width: 125vw;
+    height: 125vw;
+  }
+
+  .hero-visual-stage {
+    margin-top: -0.5rem;
+  }
+
+  .hero-visual-stage::before {
+    width: 92%;
+    right: -2%;
+    top: 5%;
+  }
+
+  .hero-ship-layer {
+    top: 5%;
+    right: -19%;
+    width: 117%;
+  }
+
+  .hero-truck-layer {
+    right: -28%;
+    bottom: 3%;
+    width: 139%;
+  }
+
+  .hero-road-plane {
+    right: -22%;
+    bottom: 2%;
+    width: 132%;
+    height: 27%;
+  }
+
+  .hero-status-ship,
+  .hero-scene-label {
+    display: none;
+  }
+
+  .hero-status-truck {
+    right: 0;
+    bottom: 11%;
+    scale: 0.85;
+    transform-origin: right bottom;
+  }
+
+  .hero-orbit-outer {
+    width: 112%;
+    right: -8%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ship-float,
+  .hero-truck-drive,
+  .hero-map-dot,
+  .hero-live-dot,
+  .hero-road-plane::before,
+  .hero-road-plane::after,
+  .hero-road-plane span {
+    animation: none !important;
+  }
+
+  .hero-orbit,
+  .hero-ship-layer,
+  .hero-truck-layer,
+  .hero-road-plane,
+  .hero-status-card {
+    transition: none !important;
+  }
+}

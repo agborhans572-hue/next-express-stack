@@ -109,16 +109,20 @@ function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-white/90 backdrop-blur-2xl border-b border-gray-200 shadow-md" : "bg-transparent"}`}
+      className={`fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500 ${
+        scrolled
+          ? "border-[#18302e]/10 bg-[#f4f1e8]/92 shadow-[0_10px_35px_rgba(24,48,46,0.06)] backdrop-blur-2xl"
+          : "border-[#18302e]/5 bg-[#f4f1e8]/75 backdrop-blur-xl"
+      }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between px-5 sm:px-8 lg:px-12 xl:px-16">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <div
             className="relative flex items-center justify-center rounded-xl shrink-0 glow-olive-sm"
             style={{
               width: 36,
               height: 36,
-              background: "linear-gradient(135deg, #9CA763 0%, #7a8750 100%)",
+              background: "linear-gradient(135deg, #18302e 0%, #2c4844 100%)",
             }}
           >
             <Truck
@@ -151,10 +155,8 @@ function Navbar() {
               }}
             />
           </div>
-          <span
-            className={`text-xl font-extrabold ${scrolled ? "text-gray-900" : "text-white"}`}
-          >
-            ShipRion<span className="text-olive-400">.</span>
+          <span className="text-xl font-extrabold tracking-[-0.035em] text-[#13201f]">
+            ShipRion<span className="text-[#9cab31]">.</span>
           </span>
         </Link>
 
@@ -164,7 +166,7 @@ function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium transition-colors duration-200 ${scrolled ? "text-gray-600 hover:text-olive-600" : "text-white/80 hover:text-white"}`}
+                className="text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
               >
                 {item.label}
               </Link>
@@ -172,7 +174,7 @@ function Navbar() {
               <button
                 key={item.label}
                 onClick={() => handleNav(item)}
-                className={`text-sm font-medium transition-colors duration-200 ${scrolled ? "text-gray-600 hover:text-olive-600" : "text-white/80 hover:text-white"}`}
+                className="text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
               >
                 {item.label}
               </button>
@@ -192,14 +194,14 @@ function Navbar() {
           {!user && (
             <Link
               href="/login"
-              className={`text-sm font-medium transition-colors ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"}`}
+              className="text-sm font-semibold text-[#56615f] transition-colors hover:text-[#13201f]"
             >
               Sign In
             </Link>
           )}
           <Link
             href={ctaHref}
-            className="flex items-center gap-2 bg-olive-500 hover:bg-olive-400 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all duration-200 glow-olive-sm hover:glow-olive"
+            className="flex items-center gap-2 rounded-full bg-[#18302e] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,48,46,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#2c4844]"
           >
             <CtaIcon className="h-4 w-4" />
             {ctaLabel}
@@ -207,7 +209,7 @@ function Navbar() {
         </div>
 
         <button
-          className={`md:hidden p-2 ${scrolled ? "text-gray-900" : "text-white"}`}
+          className="p-2 text-[#13201f] md:hidden"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -216,7 +218,7 @@ function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-gray-50/95 backdrop-blur-2xl border-t border-gray-200 px-4 py-3 space-y-1">
+        <div className="space-y-1 border-t border-[#18302e]/10 bg-[#f4f1e8]/95 px-4 py-3 backdrop-blur-2xl md:hidden">
           {NAV_ITEMS.map((item) =>
             item.kind === "route" ? (
               <Link
@@ -271,7 +273,7 @@ function Navbar() {
   );
 }
 
-function HeroSection() {
+function LegacyHeroSection() {
   const [, setLocation] = useLocation();
 
   return (
@@ -419,6 +421,203 @@ function HeroSection() {
           chain intelligence.
         </p>
       </div>
+    </section>
+  );
+}
+
+function FreightHero() {
+  const visualRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const stage = visualRef.current;
+      if (!stage || event.pointerType === "touch") return;
+
+      const bounds = stage.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+      stage.style.setProperty("--hero-x", x.toFixed(3));
+      stage.style.setProperty("--hero-y", y.toFixed(3));
+    },
+    [],
+  );
+
+  const resetPointer = useCallback(() => {
+    visualRef.current?.style.setProperty("--hero-x", "0");
+    visualRef.current?.style.setProperty("--hero-y", "0");
+  }, []);
+
+  return (
+    <section
+      id="hero"
+      className="shiprion-hero relative isolate min-h-[100svh] overflow-hidden bg-[#f4f1e8] pt-16 selection:bg-[#d9ef55] selection:text-[#13201f]"
+    >
+      <div className="hero-ambient hero-ambient-one" aria-hidden="true" />
+      <div className="hero-ambient hero-ambient-two" aria-hidden="true" />
+      <div className="hero-route-grid" aria-hidden="true" />
+
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-4rem)] max-w-[90rem] items-center gap-6 px-5 py-12 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-12 lg:py-8 xl:px-16">
+        <div className="relative z-20 max-w-[39rem] pt-4 lg:pt-0">
+          <div className="gsap-hero-badge mb-7 flex items-center gap-3">
+            <span className="h-px w-10 bg-[#9cab31]" />
+            <span className="text-[0.69rem] font-extrabold uppercase tracking-[0.28em] text-[#657020]">
+              Logistics, made intelligent
+            </span>
+          </div>
+
+          <h1 className="gsap-hero-title max-w-[12ch] text-[3.15rem] font-extrabold leading-[0.94] tracking-[-0.065em] text-[#13201f] sm:text-[4.4rem] lg:text-[5.4rem] xl:text-[6.25rem]">
+            Freight,
+            <br />
+            without the
+            <br />
+            <span className="relative inline-block text-[#68751f]">
+              friction.
+              <svg
+                className="absolute -bottom-2 left-0 w-full text-[#b6c63b]"
+                viewBox="0 0 360 18"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 14C75 3 187 2 357 9"
+                  stroke="currentColor"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          </h1>
+
+          <p className="gsap-hero-sub mt-8 max-w-[33rem] text-base leading-7 text-[#56615f] sm:text-lg sm:leading-8">
+            One connected freight network for road and ocean delivery. Plan,
+            move, and track every shipment with complete confidence.
+          </p>
+
+          <div className="gsap-hero-cta mt-9 flex flex-wrap gap-3">
+            <MagneticElement>
+              <Link
+                href="/calculator"
+                className="group inline-flex min-h-14 items-center gap-3 rounded-full bg-[#18302e] px-7 text-sm font-bold text-white shadow-[0_16px_36px_rgba(24,48,46,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#263f3c]"
+              >
+                Get a freight quote
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </MagneticElement>
+            <MagneticElement>
+              <Link
+                href="/track"
+                className="group inline-flex min-h-14 items-center gap-3 rounded-full border border-[#18302e]/25 bg-white/45 px-7 text-sm font-bold text-[#18302e] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#18302e]/50 hover:bg-white/80"
+              >
+                Track a shipment
+                <span className="grid h-6 w-6 place-items-center rounded-full border border-[#18302e]/20 transition-transform group-hover:translate-x-1">
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            </MagneticElement>
+          </div>
+
+          <div className="gsap-hero-badge-bottom mt-10 flex max-w-lg flex-wrap items-center gap-x-7 gap-y-4 border-t border-[#18302e]/15 pt-6">
+            {[
+              ["180+", "countries"],
+              ["99.4%", "on time"],
+              ["24/7", "live support"],
+            ].map(([value, label]) => (
+              <div key={label} className="flex items-baseline gap-2">
+                <span className="text-xl font-extrabold tracking-tight text-[#18302e]">
+                  {value}
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#75807e]">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          ref={visualRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={resetPointer}
+          className="hero-visual-stage gsap-hero-widgets relative h-[25rem] w-full sm:h-[34rem] lg:h-[46rem] xl:h-[51rem]"
+          aria-label="Interactive 3D scene of a Shiprion truck and cargo ship"
+        >
+          <div className="hero-orbit hero-orbit-outer" aria-hidden="true" />
+          <div className="hero-orbit hero-orbit-inner" aria-hidden="true" />
+          <div className="hero-map-dot hero-map-dot-one" aria-hidden="true" />
+          <div className="hero-map-dot hero-map-dot-two" aria-hidden="true" />
+          <div className="hero-map-dot hero-map-dot-three" aria-hidden="true" />
+
+          <div className="hero-ship-layer">
+            <div className="hero-ship-float">
+              <img
+                src="/images/hero-cargo-ship-3d.png"
+                alt="Realistic container cargo ship"
+                decoding="async"
+                className="h-auto w-full select-none object-contain"
+                draggable={false}
+              />
+            </div>
+          </div>
+
+          <div className="hero-truck-layer">
+            <div className="hero-truck-drive">
+              <img
+                src="/images/hero-truck-3d.png"
+                alt="Realistic long-haul delivery truck"
+                fetchPriority="high"
+                decoding="async"
+                className="h-auto w-full select-none object-contain"
+                draggable={false}
+              />
+            </div>
+          </div>
+
+          <div className="hero-road-plane" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <div className="hero-status-card hero-status-ship">
+            <div className="flex items-center gap-2">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-[#18302e] text-white">
+                <Ship className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#7a8583]">
+                  Ocean freight
+                </p>
+                <p className="text-sm font-extrabold text-[#18302e]">
+                  Mombasa → Rotterdam
+                </p>
+              </div>
+            </div>
+            <span className="hero-live-dot ml-auto" />
+          </div>
+
+          <div className="hero-status-card hero-status-truck">
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#7a8583]">
+                Road freight
+              </p>
+              <p className="mt-0.5 text-sm font-extrabold text-[#18302e]">
+                Final mile · 14h 22m
+              </p>
+            </div>
+            <span className="rounded-full bg-[#ddef59] px-2.5 py-1 text-[0.62rem] font-extrabold uppercase tracking-wider text-[#30400d]">
+              On time
+            </span>
+          </div>
+
+          <div className="hero-scene-label" aria-hidden="true">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#aebe2f]" />
+            Move your pointer
+          </div>
+        </div>
+      </div>
+
+      <div className="hero-bottom-line" aria-hidden="true" />
     </section>
   );
 }
@@ -2442,7 +2641,7 @@ export default function Home() {
         </script>
       </Helmet>
       <Navbar />
-      <HeroSection />
+      <FreightHero />
       <FeaturesStrip />
       <AboutSection />
       <ServicesSection />

@@ -17,6 +17,8 @@ out-tsc
 !/artifacts/frontend/public/
 !/artifacts/frontend/public/**
 /artifacts/frontend/public/**/*.png
+!/artifacts/frontend/public/images/hero-truck-3d.png
+!/artifacts/frontend/public/images/hero-cargo-ship-3d.png
 /artifacts/frontend/public/*.jpeg
 /artifacts/frontend/public/hero-ref.jpg
 
