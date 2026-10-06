@@ -937,15 +937,15 @@
   background:
     linear-gradient(
       90deg,
-      rgb(6 27 30 / 0.86),
-      rgb(6 27 30 / 0.66) 42%,
-      rgb(6 27 30 / 0.12)
+      rgb(6 27 30 / 0.6),
+      rgb(6 27 30 / 0.36) 42%,
+      rgb(6 27 30 / 0.04)
     ),
     linear-gradient(
       0deg,
-      rgb(6 27 30 / 0.78),
+      rgb(6 27 30 / 0.5),
       transparent 44%,
-      rgb(6 27 30 / 0.38)
+      rgb(6 27 30 / 0.18)
     );
 }
 .hero-content {
@@ -1171,8 +1171,8 @@
   }
   .hero-video-shade {
     background:
-      linear-gradient(90deg, rgb(6 27 30 / 0.8), rgb(6 27 30 / 0.45)),
-      linear-gradient(0deg, rgb(6 27 30 / 0.85), transparent 60%);
+      linear-gradient(90deg, rgb(6 27 30 / 0.58), rgb(6 27 30 / 0.28)),
+      linear-gradient(0deg, rgb(6 27 30 / 0.55), transparent 60%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
