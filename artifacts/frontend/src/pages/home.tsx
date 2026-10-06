@@ -454,17 +454,16 @@ function FreightHero() {
     <section id="hero" className="shiprion-hero">
       <video
         ref={videoRef}
-        src="/videos/freight-ocean.mp4"
-        poster="/videos/freight-ocean.jpg"
+        src="/videos/freight-port.mp4"
+        poster="/videos/freight-port.jpg"
         autoPlay={!motionPaused}
         muted
         loop
         playsInline
         preload="auto"
-        aria-label="Container ship moving through a working cargo port"
+        aria-label="Blue cranes unloading container ships at a sunny shipping port"
         className="hero-background-video"
       />
-      <div className="hero-video-shade" aria-hidden="true" />
 
       <div className="hero-content">
         <div className="hero-copy">

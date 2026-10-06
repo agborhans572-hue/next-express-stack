@@ -927,26 +927,6 @@
   height: 100%;
   object-fit: cover;
   object-position: 58% center;
-  filter: saturate(0.8);
-}
-.hero-video-shade {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      90deg,
-      rgb(6 27 30 / 0.6),
-      rgb(6 27 30 / 0.36) 42%,
-      rgb(6 27 30 / 0.04)
-    ),
-    linear-gradient(
-      0deg,
-      rgb(6 27 30 / 0.5),
-      transparent 44%,
-      rgb(6 27 30 / 0.18)
-    );
 }
 .hero-content {
   position: relative;
@@ -961,6 +941,7 @@
   max-width: 46rem;
   margin-block: auto;
   padding-bottom: 3.5rem;
+  text-shadow: 0 2px 6px rgb(6 27 30 / 0.5);
 }
 .hero-eyebrow {
   display: flex;
@@ -992,7 +973,7 @@
   margin-top: 1.75rem;
   font-size: 1.05rem;
   line-height: 1.8;
-  color: rgb(255 255 255 / 0.8);
+  color: #fff;
 }
 .hero-actions {
   display: flex;
@@ -1014,6 +995,7 @@
   transition:
     background 0.2s,
     transform 0.2s;
+  text-shadow: none;
 }
 .hero-quote-link {
   background: var(--hero-accent);
@@ -1044,6 +1026,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2.5rem;
+  text-shadow: 0 2px 6px rgb(6 27 30 / 0.5);
 }
 .hero-stat {
   display: flex;
@@ -1056,7 +1039,7 @@
   letter-spacing: -0.03em;
 }
 .hero-stat > span {
-  color: rgb(255 255 255 / 0.62);
+  color: #fff;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.17em;
@@ -1088,6 +1071,7 @@
 }
 .shiprion-home-nav[data-over-hero="true"] .hero-nav-label {
   color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 2px 6px rgb(6 27 30 / 0.5);
 }
 .shiprion-home-nav[data-over-hero="true"] .hero-nav-label:hover {
   color: #d6ea79;
@@ -1168,11 +1152,6 @@
   }
   .hero-background-video {
     object-position: 60% center;
-  }
-  .hero-video-shade {
-    background:
-      linear-gradient(90deg, rgb(6 27 30 / 0.58), rgb(6 27 30 / 0.28)),
-      linear-gradient(0deg, rgb(6 27 30 / 0.55), transparent 60%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
