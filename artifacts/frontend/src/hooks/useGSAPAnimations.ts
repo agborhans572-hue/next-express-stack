@@ -63,18 +63,20 @@ export function useGSAPAnimations() {
         );
 
         // Step 5 — right-side image / widget cards slide in from x:100
-        tl.fromTo(
-          ".gsap-hero-widgets",
-          { x: 100, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.72,
-            stagger: 0.16,
-            ease: "power3.out",
-          },
-          "-=0.48",
-        );
+        const heroWidgets = document.querySelectorAll(".gsap-hero-widgets");
+        if (heroWidgets.length)
+          tl.fromTo(
+            heroWidgets,
+            { x: 100, opacity: 0 },
+            {
+              x: 0,
+              opacity: 1,
+              duration: 0.72,
+              stagger: 0.16,
+              ease: "power3.out",
+            },
+            "-=0.48",
+          );
 
         // Bottom social-proof badge
         tl.fromTo(

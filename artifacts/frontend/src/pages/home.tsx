@@ -59,6 +59,8 @@ import {
   Zap,
   Award,
   Shield,
+  Pause,
+  Play,
 } from "lucide-react";
 
 declare const __GOOGLE_MAPS_API_KEY__: string;
@@ -109,10 +111,11 @@ function Navbar() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500 ${
+      data-over-hero={!scrolled}
+      className={`shiprion-home-nav fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500 ${
         scrolled
           ? "border-[#18302e]/10 bg-[#f4f1e8]/92 shadow-[0_10px_35px_rgba(24,48,46,0.06)] backdrop-blur-2xl"
-          : "border-[#18302e]/5 bg-[#f4f1e8]/75 backdrop-blur-xl"
+          : "border-white/15 bg-[#0b2428]/10"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between px-5 sm:px-8 lg:px-12 xl:px-16">
@@ -155,7 +158,7 @@ function Navbar() {
               }}
             />
           </div>
-          <span className="text-xl font-extrabold tracking-[-0.035em] text-[#13201f]">
+          <span className="hero-nav-label text-xl font-extrabold tracking-[-0.035em] text-[#13201f]">
             ShipRion<span className="text-[#9cab31]">.</span>
           </span>
         </Link>
@@ -166,7 +169,7 @@ function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
+                className="hero-nav-label text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
               >
                 {item.label}
               </Link>
@@ -174,7 +177,7 @@ function Navbar() {
               <button
                 key={item.label}
                 onClick={() => handleNav(item)}
-                className="text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
+                className="hero-nav-label text-sm font-semibold text-[#56615f] transition-colors duration-200 hover:text-[#68751f]"
               >
                 {item.label}
               </button>
@@ -194,14 +197,14 @@ function Navbar() {
           {!user && (
             <Link
               href="/login"
-              className="text-sm font-semibold text-[#56615f] transition-colors hover:text-[#13201f]"
+              className="hero-nav-label text-sm font-semibold text-[#56615f] transition-colors hover:text-[#13201f]"
             >
               Sign In
             </Link>
           )}
           <Link
             href={ctaHref}
-            className="flex items-center gap-2 rounded-full bg-[#18302e] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,48,46,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#2c4844]"
+            className="hero-nav-cta flex items-center gap-2 rounded-full bg-[#18302e] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,48,46,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#2c4844]"
           >
             <CtaIcon className="h-4 w-4" />
             {ctaLabel}
@@ -209,7 +212,7 @@ function Navbar() {
         </div>
 
         <button
-          className="p-2 text-[#13201f] md:hidden"
+          className="hero-nav-label p-2 text-[#13201f] md:hidden"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -426,178 +429,102 @@ function LegacyHeroSection() {
 }
 
 function FreightHero() {
-  const [motionPaused, setMotionPaused] = useState(false);
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [motionPaused, setMotionPaused] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : true,
+  );
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setMotionPaused(preference.matches);
     const update = () => setMotionPaused(preference.matches);
     preference.addEventListener("change", update);
     return () => preference.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
-    videoRefs.current.forEach((video) => {
-      if (!video) return;
-      if (motionPaused) video.pause();
-      else void video.play().catch(() => {});
-    });
+    const video = videoRef.current;
+    if (!video) return;
+    if (motionPaused) video.pause();
+    else void video.play().catch(() => setMotionPaused(true));
   }, [motionPaused]);
 
   return (
-    <section
-      id="hero"
-      className="shiprion-hero relative isolate min-h-[100svh] overflow-hidden bg-[#f4f1e8] pt-16 selection:bg-[#d9ef55] selection:text-[#13201f]"
-    >
-      <div className="hero-ambient hero-ambient-one" aria-hidden="true" />
-      <div className="hero-ambient hero-ambient-two" aria-hidden="true" />
-      <div className="hero-route-grid" aria-hidden="true" />
+    <section id="hero" className="shiprion-hero">
+      <video
+        ref={videoRef}
+        src="/videos/freight-ocean.mp4"
+        poster="/videos/freight-ocean.jpg"
+        autoPlay={!motionPaused}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-label="Container ship moving through a working cargo port"
+        className="hero-background-video"
+      />
+      <div className="hero-video-shade" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-4rem)] max-w-[90rem] items-center gap-6 px-5 py-12 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-12 lg:py-8 xl:px-16">
-        <div className="relative z-20 max-w-[39rem] pt-4 lg:pt-0">
-          <div className="gsap-hero-badge mb-7 flex items-center gap-3">
-            <span className="h-px w-10 bg-[#9cab31]" />
-            <span className="text-[0.69rem] font-extrabold uppercase tracking-[0.28em] text-[#657020]">
-              Logistics, made intelligent
-            </span>
+      <div className="hero-content">
+        <div className="hero-copy">
+          <div className="gsap-hero-badge hero-eyebrow">
+            <span aria-hidden="true" />
+            Logistics, made intelligent
           </div>
-
-          <h1 className="gsap-hero-title max-w-[12ch] text-[3.15rem] font-extrabold leading-[0.94] tracking-[-0.065em] text-[#13201f] sm:text-[4.4rem] lg:text-[5.4rem] xl:text-[6.25rem]">
+          <h1 className="gsap-hero-title hero-heading">
             Freight,
             <br />
             without the
             <br />
-            <span className="relative inline-block text-[#68751f]">
-              friction.
-              <svg
-                className="absolute -bottom-2 left-0 w-full text-[#b6c63b]"
-                viewBox="0 0 360 18"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 14C75 3 187 2 357 9"
-                  stroke="currentColor"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
+            <span>friction.</span>
           </h1>
-
-          <p className="gsap-hero-sub mt-8 max-w-[33rem] text-base leading-7 text-[#56615f] sm:text-lg sm:leading-8">
+          <p className="gsap-hero-sub hero-description">
             One connected freight network for road and ocean delivery. Plan,
             move, and track every shipment with complete confidence.
           </p>
-
-          <div className="gsap-hero-cta mt-9 flex flex-wrap gap-3">
+          <div className="gsap-hero-cta hero-actions">
             <MagneticElement>
-              <Link
-                href="/calculator"
-                className="group inline-flex min-h-14 items-center gap-3 rounded-full bg-[#18302e] px-7 text-sm font-bold text-white shadow-[0_16px_36px_rgba(24,48,46,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#263f3c]"
-              >
-                Get a freight quote
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Link href="/calculator" className="hero-quote-link">
+                Get a freight quote <ArrowRight className="h-4 w-4" />
               </Link>
             </MagneticElement>
             <MagneticElement>
-              <Link
-                href="/track"
-                className="group inline-flex min-h-14 items-center gap-3 rounded-full border border-[#18302e]/25 bg-white/45 px-7 text-sm font-bold text-[#18302e] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#18302e]/50 hover:bg-white/80"
-              >
-                Track a shipment
-                <span className="grid h-6 w-6 place-items-center rounded-full border border-[#18302e]/20 transition-transform group-hover:translate-x-1">
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
+              <Link href="/track" className="hero-track-link">
+                Track a shipment <ArrowRight className="h-4 w-4" />
               </Link>
             </MagneticElement>
           </div>
+        </div>
 
-          <div className="gsap-hero-badge-bottom mt-10 flex max-w-lg flex-wrap items-center gap-x-7 gap-y-4 border-t border-[#18302e]/15 pt-6">
+        <div className="gsap-hero-badge-bottom hero-footer">
+          <div className="hero-stats">
             {[
               ["180+", "countries"],
               ["99.4%", "on time"],
               ["24/7", "live support"],
             ].map(([value, label]) => (
-              <div key={label} className="flex items-baseline gap-2">
-                <span className="text-xl font-extrabold tracking-tight text-[#18302e]">
-                  {value}
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#75807e]">
-                  {label}
-                </span>
+              <div key={label} className="hero-stat">
+                <strong>{value}</strong>
+                <span>{label}</span>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="hero-film-stage gsap-hero-widgets">
-          {[
-            {
-              key: "ocean",
-              video: "/videos/freight-ocean.mp4",
-              poster: "/videos/freight-ocean.jpg",
-              title: "Across oceans.",
-              label: "01 / OCEAN FREIGHT",
-              description: "Container ship and port operations",
-            },
-            {
-              key: "road",
-              video: "/videos/freight-road.mp4",
-              poster: "/videos/freight-road.jpg",
-              title: "Beyond borders.",
-              label: "02 / ROAD FREIGHT",
-              description:
-                "Freight truck crossing a bridge through a green mountain valley",
-            },
-          ].map((scene, index) => (
-            <div className={`hero-film hero-film-${scene.key}`} key={scene.key}>
-              <video
-                ref={(element) => {
-                  videoRefs.current[index] = element;
-                }}
-                src={scene.video}
-                poster={scene.poster}
-                muted
-                loop
-                playsInline
-                preload="auto"
-                aria-label={scene.description}
-                className="hero-film-video"
-              />
-              <div className="hero-film-shade" aria-hidden="true" />
-              <div className="hero-film-caption">
-                <span>{scene.label}</span>
-                <p>{scene.title}</p>
-              </div>
-              <span className="hero-film-icon" aria-hidden="true">
-                {scene.key === "ocean" ? (
-                  <Ship className="h-5 w-5" />
-                ) : (
-                  <Truck className="h-5 w-5" />
-                )}
-              </span>
-            </div>
-          ))}
-          <div className="hero-film-footer">
-            <span className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#b6c63b]" /> One
-              network. Always moving.
-            </span>
-            <button
-              type="button"
-              onClick={() => setMotionPaused((paused) => !paused)}
-              aria-pressed={motionPaused}
-              className="hero-motion-toggle"
-            >
-              {motionPaused ? "Play motion" : "Pause motion"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setMotionPaused((paused) => !paused)}
+            aria-pressed={motionPaused}
+            className="hero-motion-toggle"
+          >
+            {motionPaused ? (
+              <Play className="h-3.5 w-3.5" />
+            ) : (
+              <Pause className="h-3.5 w-3.5" />
+            )}
+            {motionPaused ? "Play video" : "Pause video"}
+          </button>
         </div>
       </div>
-
-      <div className="hero-bottom-line" aria-hidden="true" />
     </section>
   );
 }
