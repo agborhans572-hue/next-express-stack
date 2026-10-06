@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGSAPAnimations } from "@/hooks/useGSAPAnimations";
 import { useEliteAnimations } from "@/hooks/useEliteAnimations";
 import { ScrambleText } from "@/components/ScrambleText";
@@ -426,27 +426,24 @@ function LegacyHeroSection() {
 }
 
 function FreightHero() {
-  const visualRef = useRef<HTMLDivElement>(null);
+  const [motionPaused, setMotionPaused] = useState(false);
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
 
-  const handlePointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      const stage = visualRef.current;
-      if (!stage || event.pointerType === "touch") return;
-
-      const bounds = stage.getBoundingClientRect();
-      const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-      const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-      stage.style.setProperty("--hero-x", x.toFixed(3));
-      stage.style.setProperty("--hero-y", y.toFixed(3));
-    },
-    [],
-  );
-
-  const resetPointer = useCallback(() => {
-    visualRef.current?.style.setProperty("--hero-x", "0");
-    visualRef.current?.style.setProperty("--hero-y", "0");
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setMotionPaused(preference.matches);
+    const update = () => setMotionPaused(preference.matches);
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
   }, []);
+
+  useEffect(() => {
+    videoRefs.current.forEach((video) => {
+      if (!video) return;
+      if (motionPaused) video.pause();
+      else void video.play().catch(() => {});
+    });
+  }, [motionPaused]);
 
   return (
     <section
@@ -535,84 +532,67 @@ function FreightHero() {
           </div>
         </div>
 
-        <div
-          ref={visualRef}
-          onPointerMove={handlePointerMove}
-          onPointerLeave={resetPointer}
-          className="hero-visual-stage gsap-hero-widgets relative h-[25rem] w-full sm:h-[34rem] lg:h-[46rem] xl:h-[51rem]"
-          aria-label="Interactive 3D scene of a Shiprion truck and cargo ship"
-        >
-          <div className="hero-orbit hero-orbit-outer" aria-hidden="true" />
-          <div className="hero-orbit hero-orbit-inner" aria-hidden="true" />
-          <div className="hero-map-dot hero-map-dot-one" aria-hidden="true" />
-          <div className="hero-map-dot hero-map-dot-two" aria-hidden="true" />
-          <div className="hero-map-dot hero-map-dot-three" aria-hidden="true" />
-
-          <div className="hero-ship-layer">
-            <div className="hero-ship-float">
-              <img
-                src="/images/hero-cargo-ship-3d.png"
-                alt="Realistic container cargo ship"
-                decoding="async"
-                className="h-auto w-full select-none object-contain"
-                draggable={false}
+        <div className="hero-film-stage gsap-hero-widgets">
+          {[
+            {
+              key: "ocean",
+              video: "/videos/freight-ocean.mp4",
+              poster: "/videos/freight-ocean.jpg",
+              title: "Across oceans.",
+              label: "01 / OCEAN FREIGHT",
+              description: "Container ship and port operations",
+            },
+            {
+              key: "road",
+              video: "/videos/freight-road.mp4",
+              poster: "/videos/freight-road.jpg",
+              title: "Beyond borders.",
+              label: "02 / ROAD FREIGHT",
+              description:
+                "Freight truck crossing a bridge through a green mountain valley",
+            },
+          ].map((scene, index) => (
+            <div className={`hero-film hero-film-${scene.key}`} key={scene.key}>
+              <video
+                ref={(element) => {
+                  videoRefs.current[index] = element;
+                }}
+                src={scene.video}
+                poster={scene.poster}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-label={scene.description}
+                className="hero-film-video"
               />
-            </div>
-          </div>
-
-          <div className="hero-truck-layer">
-            <div className="hero-truck-drive">
-              <img
-                src="/images/hero-truck-3d.png"
-                alt="Realistic long-haul delivery truck"
-                fetchPriority="high"
-                decoding="async"
-                className="h-auto w-full select-none object-contain"
-                draggable={false}
-              />
-            </div>
-          </div>
-
-          <div className="hero-road-plane" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-
-          <div className="hero-status-card hero-status-ship">
-            <div className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-[#18302e] text-white">
-                <Ship className="h-4 w-4" />
-              </span>
-              <div>
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#7a8583]">
-                  Ocean freight
-                </p>
-                <p className="text-sm font-extrabold text-[#18302e]">
-                  Mombasa → Rotterdam
-                </p>
+              <div className="hero-film-shade" aria-hidden="true" />
+              <div className="hero-film-caption">
+                <span>{scene.label}</span>
+                <p>{scene.title}</p>
               </div>
+              <span className="hero-film-icon" aria-hidden="true">
+                {scene.key === "ocean" ? (
+                  <Ship className="h-5 w-5" />
+                ) : (
+                  <Truck className="h-5 w-5" />
+                )}
+              </span>
             </div>
-            <span className="hero-live-dot ml-auto" />
-          </div>
-
-          <div className="hero-status-card hero-status-truck">
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#7a8583]">
-                Road freight
-              </p>
-              <p className="mt-0.5 text-sm font-extrabold text-[#18302e]">
-                Final mile · 14h 22m
-              </p>
-            </div>
-            <span className="rounded-full bg-[#ddef59] px-2.5 py-1 text-[0.62rem] font-extrabold uppercase tracking-wider text-[#30400d]">
-              On time
+          ))}
+          <div className="hero-film-footer">
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#b6c63b]" /> One
+              network. Always moving.
             </span>
-          </div>
-
-          <div className="hero-scene-label" aria-hidden="true">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#aebe2f]" />
-            Move your pointer
+            <button
+              type="button"
+              onClick={() => setMotionPaused((paused) => !paused)}
+              aria-pressed={motionPaused}
+              className="hero-motion-toggle"
+            >
+              {motionPaused ? "Play motion" : "Pause motion"}
+            </button>
           </div>
         </div>
       </div>
