@@ -26,9 +26,13 @@ test("public navigation, quote, tracking, and account screens render without con
   ).toBeVisible();
   await page
     .getByRole("navigation", { name: "Account navigation", exact: true })
-    .getByRole("link", { name: "Login", exact: true })
+    .getByRole("link", { name: "Login / Sign up", exact: true })
     .click();
   await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByTestId("form-login")).toBeVisible();
+  await page.getByTestId("tab-register").click();
+  await expect(page.getByTestId("form-register")).toBeVisible();
+  await page.getByTestId("tab-login").click();
   await expect(page.getByTestId("form-login")).toBeVisible();
 
   await page.goto("/calculator?origin=Nairobi&destination=Mombasa&weight=10");

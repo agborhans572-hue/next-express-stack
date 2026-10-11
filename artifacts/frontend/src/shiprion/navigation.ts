@@ -18,8 +18,7 @@ export const footerGroups = [
       ["Ocean Freight", "/services"],
       ["Rate Calculator", "/calculator"],
       ["Contact Us", "/contact"],
-      ["Login", "/login"],
-      ["Create Account", "/login?tab=register"],
+      ["Login / Sign up", "/login"],
     ],
   },
   {
@@ -42,10 +41,7 @@ export const shippingLinks = [
   ["Contact Shiprion", "/contact"],
 ] as const;
 
-export const accountLinks = [
-  ["Login", "/login"],
-  ["Sign up", "/login?tab=register"],
-] as const;
+export const accountLinks = [["Login / Sign up", "/login"]] as const;
 
 /** Add the original shipping destinations to every locally captured page. */
 export function withShippingNavigation(template: string) {
@@ -80,7 +76,7 @@ export function withShippingNavigation(template: string) {
       `<nav class="header__account-links" aria-label="Account navigation">${accountLinks
         .map(
           ([label, href]) =>
-            `<a class="txt txt-16${label === "Sign up" ? " header__signup" : ""}" data-account-guest href="${href}">${label}</a>`,
+            `<a class="txt txt-16 header__signup" data-account-guest href="${href}">${label}</a>`,
         )
         .join(
           "",

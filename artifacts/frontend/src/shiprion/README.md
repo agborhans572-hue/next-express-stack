@@ -94,9 +94,9 @@ regression scenarios against the production build, including the full quote,
 customer, staff, admin, tracking, delivery proof, recovery, and support lifecycle.
 All 13 marketing interaction scenarios also passed against the production build.
 
-Desktop account navigation and mobile menus expose Login (`/login`) and Sign up
-(`/login?tab=register`). The original Create Account footer destination now opens
-registration directly, and Login is also available in the footer. Signed-in users
+Desktop account navigation, mobile menus, and the footer expose one Login / Sign up
+entry (`/login`). Both forms are available through the account screen's tabs, and
+existing `/login?tab=register` links still open registration directly. Signed-in users
 see their customer or staff dashboard in the header and menu. `account.css` scopes
 the orange palette, local Helvetica fonts, and form styling to the account page;
 the existing login, email verification, and registration APIs remain in use.

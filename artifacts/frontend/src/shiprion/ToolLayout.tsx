@@ -352,13 +352,7 @@ export default function ToolLayout({
               </a>
             ) : (
               accountLinks.map(([label, href]) => (
-                <a
-                  key={href}
-                  className={
-                    label === "Sign up" ? "tool-signup-link" : undefined
-                  }
-                  href={href}
-                >
+                <a key={href} className="tool-signup-link" href={href}>
                   {label}
                 </a>
               ))

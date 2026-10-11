@@ -35,9 +35,9 @@ export function PublicNavbar() {
     setMobileOpen(false);
   }, [location]);
 
-  const ctaHref = user ? "/dashboard" : "/login?tab=register";
+  const ctaHref = user ? "/dashboard" : "/login";
   const CtaIcon = user ? LayoutDashboard : LogIn;
-  const ctaLabel = user ? "Dashboard" : "Get Started";
+  const ctaLabel = user ? "Dashboard" : "Login / Sign up";
 
   return (
     <nav
@@ -133,14 +133,6 @@ export function PublicNavbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {!user && (
-            <Link
-              href="/login"
-              className="hidden md:inline-flex text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium"
-            >
-              Sign In
-            </Link>
-          )}
           <Link href={ctaHref} className="hidden md:flex">
             <Button
               size="sm"

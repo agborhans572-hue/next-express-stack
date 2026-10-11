@@ -89,8 +89,7 @@ test("original footer links are available on all marketing and shipping pages", 
     "Shipping Policy": "/shipping-policy",
     "Insurance Policy": "/insurance-policy",
     FAQ: "/faq",
-    Login: "/login",
-    "Create Account": "/login?tab=register",
+    "Login / Sign up": "/login",
   };
   for (const path of [
     "/",
@@ -124,18 +123,22 @@ test("original footer links are available on all marketing and shipping pages", 
       exact: true,
     });
     await expect(
-      account.getByRole("link", { name: "Login", exact: true }),
+      account.getByRole("link", { name: "Login / Sign up", exact: true }),
     ).toBeVisible();
-    await expect(
-      account.getByRole("link", { name: "Sign up", exact: true }),
-    ).toBeVisible();
+    await expect(account.getByRole("link")).toHaveCount(1);
   }
   await page
     .locator("footer")
-    .getByRole("link", { name: "Create Account", exact: true })
+    .getByRole("link", { name: "Login / Sign up", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/login\?tab=register$/);
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByTestId("form-login")).toBeVisible();
+  await page.getByTestId("tab-register").click();
   await expect(page.getByTestId("form-register")).toBeVisible();
+  await page.goto("/services");
+  const legacyAccount = page.getByTestId("navbar").locator('a[href="/login"]');
+  await expect(legacyAccount).toHaveCount(1);
+  await expect(legacyAccount).toHaveText("Login / Sign up");
 });
 
 test("signed-in customers and staff get their dashboard link instead of guest account links", async ({
@@ -169,10 +172,7 @@ test("signed-in customers and staff get their dashboard link instead of guest ac
         account.getByRole("link", { name: "My dashboard", exact: true }),
       ).toHaveAttribute("href", role === "customer" ? "/dashboard" : "/admin");
       await expect(
-        account.getByRole("link", { name: "Login", exact: true }),
-      ).toBeHidden();
-      await expect(
-        account.getByRole("link", { name: "Sign up", exact: true }),
+        account.getByRole("link", { name: "Login / Sign up", exact: true }),
       ).toBeHidden();
       await page.setViewportSize({ width: 390, height: 844 });
       await page
@@ -183,10 +183,7 @@ test("signed-in customers and staff get their dashboard link instead of guest ac
         menu.getByRole("link", { name: "My dashboard.", exact: true }),
       ).toHaveAttribute("href", role === "customer" ? "/dashboard" : "/admin");
       await expect(
-        menu.getByRole("link", { name: "Login.", exact: true }),
-      ).toBeHidden();
-      await expect(
-        menu.getByRole("link", { name: "Sign up.", exact: true }),
+        menu.getByRole("link", { name: "Login / Sign up.", exact: true }),
       ).toBeHidden();
     }
   }
@@ -491,9 +488,11 @@ test("mobile navigation supports keyboard use and document styles clean up betwe
     .click();
   await page
     .locator(".header__nav")
-    .getByRole("link", { name: "Sign up.", exact: true })
+    .getByRole("link", { name: "Login / Sign up.", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/login\?tab=register$/);
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByTestId("form-login")).toBeVisible();
+  await page.getByTestId("tab-register").click();
   await expect(
     page.getByRole("heading", { name: "Create your account", exact: true }),
   ).toBeVisible();
@@ -508,7 +507,7 @@ test("mobile navigation supports keyboard use and document styles clean up betwe
     .click();
   await page
     .getByRole("navigation", { name: "Expanded navigation" })
-    .getByRole("link", { name: "Login.", exact: true })
+    .getByRole("link", { name: "Login / Sign up.", exact: true })
     .click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByTestId("form-login")).toBeVisible();
