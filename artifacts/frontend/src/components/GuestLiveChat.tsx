@@ -52,8 +52,10 @@ function clearGuestSession(): void {
 
 export default function GuestLiveChat({
   forceOpen = false,
+  openRequest = 0,
 }: {
   forceOpen?: boolean;
+  openRequest?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -81,11 +83,11 @@ export default function GuestLiveChat({
   }, []);
 
   useEffect(() => {
-    if (forceOpen) {
+    if (forceOpen || openRequest > 0) {
       setOpen(true);
       setMinimized(false);
     }
-  }, [forceOpen]);
+  }, [forceOpen, openRequest]);
 
   useEffect(() => {
     if (open && unread > 0) setUnread(0);

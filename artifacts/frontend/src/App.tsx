@@ -134,9 +134,17 @@ function App() {
 
 function LegacyCookieBanner() {
   const [location] = useLocation();
-  return ["/", "/about", "/tech", "/news", "/privacy", "/legal"].includes(
-    location,
-  ) ? null : (
+  return location.startsWith("/track") ||
+    [
+      "/",
+      "/about",
+      "/tech",
+      "/news",
+      "/privacy",
+      "/legal",
+      "/calculator",
+      "/contact",
+    ].includes(location) ? null : (
     <CookieBanner />
   );
 }

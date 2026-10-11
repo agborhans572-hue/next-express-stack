@@ -3,6 +3,59 @@ body.shiprion-document {
   background: #fff;
   color: #151515;
 }
+.shiprion-root .header__links-inner {
+  column-gap: 2.2rem;
+}
+.shiprion-root .header__links {
+  --default-width: 112rem;
+  margin-right: 2rem;
+}
+.shiprion-root .shipping-footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.4rem;
+  align-items: start;
+}
+.shiprion-root .shipping-footer-group {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 1rem;
+}
+.shiprion-root .shipping-footer-group h3 {
+  margin-bottom: 1rem;
+}
+.shiprion-root .footer__info-contact {
+  grid-column: 5 / 9;
+  min-width: 0;
+}
+.shiprion-root .footer__info-contact-link {
+  font-size: 2.8rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.shiprion-root .footer__info-legal {
+  grid-column: 5 / 9;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+@media (max-width: 767px) {
+  .shiprion-root .footer__info-contact,
+  .shiprion-root .footer__info-legal {
+    grid-column: 1 / -1;
+  }
+  .shiprion-root .footer__info-contact-link {
+    font-size: 2.2rem;
+  }
+  .shiprion-root .shipping-footer-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 3rem;
+  }
+  .shiprion-root .header__nav {
+    max-height: calc(100dvh - 9rem);
+    overflow-y: auto;
+  }
+}
 .shiprion-root .header__logo {
   align-items: center;
   gap: 1.1rem;

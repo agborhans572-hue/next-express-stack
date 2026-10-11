@@ -6,8 +6,19 @@ with Shiprion branding, wordmarks, metadata, and the existing Shiprion contact d
 The reference site's award badge and company registration identifiers have been
 removed. Third-party article destinations and asset-manifest source URLs retain
 their real addresses for link integrity and source attribution.
-Shipping, tracking, calculator, account, dashboard, support, and admin routes retain
-their existing implementations.
+`/track` (including direct tracking URLs), `/calculator`, and `/contact` use
+`ToolLayout.tsx` and `tools.css` for the orange and white theme, Helvetica fonts,
+responsive navigation, GSAP reveals, page transitions, Lenis scrolling, and shared
+newsletter footer. Their existing tracking, quote, support, and account APIs remain
+in use. Tool styles keep the document's default font scale so existing shipment
+detail and chat components remain readable. Animation and scrolling effects are
+removed on navigation, and reduced motion is supported.
+
+`navigation.ts` restores the original Shiprion footer destinations across all nine
+pages and adds tracking, calculator, and contact links to the marketing headers
+and mobile menus. Account, dashboard, admin, services, and policy URLs remain
+available. Shipping forms retain values on failures; pending submissions are
+guarded and success follows the server response.
 
 `content/` contains sanitized HTML, the scoped reference stylesheet, the asset
 manifest, and port coordinates. `public/shiprion/` contains the original images,
@@ -72,6 +83,16 @@ horizontal overflow. Updated vessel and consent captures are stored separately
 in `.cache/shiprion/visual-updated` (27 captures; the updated audit passed). The requested <1% screenshot difference has
 not been certified. A sampled headline mask comparison exceeded that target, and
 video frames and camera trajectories require a separately synchronized comparison.
+
+`e2e/shiprion-tools.spec.ts` verifies the restored footer links on all nine pages,
+tracking search and history, quote estimates and errors, contact validation and
+retry, newsletter persistence, menu keyboard navigation, and document cleanup.
+It also captures all three shipping pages at 390×844, 768×1024, 1500×865, and
+1920×1080 and checks horizontal overflow.
+The shipping update passed all eight tool scenarios and both existing shipping
+regression scenarios against the production build, including the full quote,
+customer, staff, admin, tracking, delivery proof, recovery, and support lifecycle.
+All 13 marketing interaction scenarios also passed against the production build.
 
 The existing complete shipping regression supports `E2E_FULL=true`. Set
 `E2E_LOCAL_STORAGE=true` to use the local test-only S3 fixture for proof uploads and

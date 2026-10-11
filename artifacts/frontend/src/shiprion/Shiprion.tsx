@@ -18,6 +18,7 @@ import {
 import { initializeMotion } from "./motion";
 import { initializeTeam } from "./team";
 import CookieConsent from "./CookieConsent";
+import { withShippingNavigation } from "./navigation";
 import home from "./content/home.html?raw";
 import about from "./content/about.html?raw";
 import tech from "./content/tech.html?raw";
@@ -28,7 +29,11 @@ import "./content/reference.css";
 import "./replica.css";
 
 const Vessel = lazy(() => import("./Vessel"));
-const templates = { home, about, tech, news, privacy, legal };
+const templates = Object.fromEntries(
+  Object.entries({ home, about, tech, news, privacy, legal }).map(
+    ([key, html]) => [key, withShippingNavigation(html)],
+  ),
+) as Record<"home" | "about" | "tech" | "news" | "privacy" | "legal", string>;
 export type ShiprionPage = keyof typeof templates;
 const titles: Record<ShiprionPage, string> = {
   home: "Shiprion — Wind-powered shipping",

@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useId } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { useQueryClient } from "@tanstack/react-query";
-import { PublicNavbar } from "@/components/navbar";
+import ToolLayout, { ToolHero } from "@/shiprion/ToolLayout";
 import { ShipmentMap } from "@/components/ShipmentMap";
 import {
   useTrackShipment,
@@ -43,6 +43,7 @@ import {
   Globe,
   RefreshCw,
   ShieldCheck,
+  ArrowUpRight,
 } from "lucide-react";
 
 const STATUS_CONFIG: Record<
@@ -701,59 +702,43 @@ function TrackingLoadingSkeleton() {
 function TrackingInput({ initial }: { initial: string }) {
   const [value, setValue] = useState(initial);
   const [, setLocation] = useLocation();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    const q = value.trim();
-    if (q.length >= 8 && q !== initial) {
-      debounceRef.current = setTimeout(() => {
-        setLocation(`/track/${encodeURIComponent(q.toUpperCase())}`);
-      }, 800);
-    }
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [value, initial, setLocation]);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    setLocation(`/track/${encodeURIComponent(trimmed.toUpperCase())}`);
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const number = value.trim().toUpperCase();
+    if (number) setLocation(`/track/${encodeURIComponent(number)}`);
   }
-
   return (
-    <div className="space-y-3">
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter tracking number, e.g. AB12345678"
-            className="pl-9 bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-olive-500/50"
-            data-testid="input-tracking-search"
-          />
-        </div>
-        <Button type="submit" data-testid="button-search-tracking">
-          Track
-          <ArrowRight className="h-4 w-4 ml-1.5" />
-        </Button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="tool-tracking-form">
+      <div>
+        <input
+          aria-label="Tracking number"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Enter your tracking number"
+          autoComplete="off"
+          spellCheck={false}
+          required
+          maxLength={80}
+          data-testid="input-tracking-search"
+        />
+      </div>
+      <button type="submit" data-testid="button-search-tracking">
+        Track order
+        <ArrowUpRight size={24} />
+      </button>
+    </form>
   );
 }
 
 /* ─── FAQ accordion ─── */
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const answerId = useId();
   return (
     <div className="border-b border-gray-200 last:border-0">
       <button
+        aria-expanded={open}
+        aria-controls={answerId}
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between py-4 text-left text-sm font-semibold text-gray-900 hover:text-olive-400 transition-colors gap-4"
       >
@@ -766,6 +751,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         </motion.span>
       </button>
       <motion.div
+        id={answerId}
+        aria-hidden={!open}
         initial={false}
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.28, ease: "easeInOut" }}
@@ -779,67 +766,6 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 /* ─── Idle content shown when no tracking number entered ─── */
 function TrackIdleContent() {
-  const [, setLocation] = useLocation();
-
-  const HOW_IT_WORKS = [
-    {
-      step: "01",
-      icon: Search,
-      color: "bg-olive-500/10 text-olive-400",
-      title: "Enter Your Tracking Number",
-      desc: "Type or paste the tracking number from your confirmation email into the search bar above.",
-    },
-    {
-      step: "02",
-      icon: RefreshCw,
-      color: "bg-olive-500/10 text-olive-400",
-      title: "Instant Database Lookup",
-      desc: "Our system queries your shipment record in real time — no login required.",
-    },
-    {
-      step: "03",
-      icon: Globe,
-      color: "bg-emerald-500/10 text-emerald-400",
-      title: "Live Status & Full History",
-      desc: "See where your package is right now, every location it has passed through, and the estimated delivery date.",
-    },
-  ];
-
-  const SHIPMENT_TYPES = [
-    {
-      icon: Plane,
-      label: "Air Freight",
-      desc: "120+ countries, 24–96 hr delivery",
-      bg: "bg-sky-500/10",
-      iconColor: "text-sky-400",
-      border: "border-sky-500/20",
-    },
-    {
-      icon: Ship,
-      label: "Sea Freight",
-      desc: "FCL & LCL, port-to-door covered",
-      bg: "bg-teal-500/10",
-      iconColor: "text-teal-400",
-      border: "border-teal-500/20",
-    },
-    {
-      icon: Truck,
-      label: "Road Freight",
-      desc: "FTL & LTL across the continent",
-      bg: "bg-orange-500/10",
-      iconColor: "text-orange-400",
-      border: "border-orange-500/20",
-    },
-    {
-      icon: Zap,
-      label: "Express",
-      desc: "Next-day & same-day delivery",
-      bg: "bg-olive-500/10",
-      iconColor: "text-olive-400",
-      border: "border-olive-500/20",
-    },
-  ];
-
   const FAQS = [
     {
       q: "Where do I find my tracking number?",
@@ -862,214 +788,88 @@ function TrackIdleContent() {
       a: "Absolutely. Shiprion covers 180+ countries and tracking is available end-to-end for all international air, sea, and road shipments, including customs clearance milestones.",
     },
   ];
-
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-14">
-      {/* Tracking number hint */}
-      <FadeIn direction="up">
-        <div className="bg-white backdrop-blur-xl border border-gray-200 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          <div className="w-12 h-12 bg-olive-500/15 rounded-xl flex items-center justify-center shrink-0">
-            <Package className="h-6 w-6 text-olive-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-gray-900 mb-1">
-              Where is my tracking number?
-            </h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Look for it in your{" "}
-              <span className="font-semibold text-olive-400">
-                booking confirmation email
-              </span>{" "}
-              — it looks like this:
-            </p>
-            <code className="inline-block mt-2 text-sm font-mono bg-gray-50 border border-gray-300 text-olive-400 px-3 py-1.5 rounded-lg">
-              SHP-20260426-AB1234
-            </code>
-          </div>
-          <Button
-            className="bg-olive-500 hover:bg-olive-400 glow-olive shrink-0"
-            onClick={() => {
-              const el = document.querySelector<HTMLInputElement>(
-                '[data-testid="input-tracking-search"]',
-              );
-              el?.focus();
-            }}
-          >
-            Track Now <ArrowRight className="h-4 w-4 ml-1.5" />
-          </Button>
+    <div className="tool-shell">
+      <section className="tool-section" data-reveal>
+        <div className="tool-section-head">
+          <h2>Every step. In sight.</h2>
+          <p>From booking to delivery, stay connected to your cargo.</p>
         </div>
-      </FadeIn>
-
-      {/* How it works */}
-      <FadeIn direction="up" delay={0.05}>
-        <div>
-          <p className="text-xs font-bold text-olive-400 tracking-widest uppercase mb-2">
-            Simple & Instant
-          </p>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-8">
-            How tracking works
-          </h2>
-          <StaggerList className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {HOW_IT_WORKS.map(({ step, icon: Icon, color, title, desc }) => (
-              <StaggerItem key={step}>
-                <motion.div
-                  whileHover={{
-                    y: -4,
-                    boxShadow: "0 12px 32px rgba(0,0,0,0.3)",
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                  className="bg-white backdrop-blur-xl rounded-2xl border border-gray-200 p-6 h-full"
-                >
-                  <span className="text-3xl font-extrabold text-gray-900/[0.06] leading-none block mb-3">
-                    {step}
-                  </span>
-                  <div
-                    className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center mb-4`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">{title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {desc}
-                  </p>
-                </motion.div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </FadeIn>
-
-      {/* What we track */}
-      <FadeIn direction="up" delay={0.05}>
-        <div>
-          <p className="text-xs font-bold text-olive-400 tracking-widest uppercase mb-2">
-            Full Coverage
-          </p>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
-            What we track
-          </h2>
-          <StaggerList className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {SHIPMENT_TYPES.map(
-              ({ icon: Icon, label, desc, bg, iconColor, border }) => (
-                <StaggerItem key={label}>
-                  <motion.div
-                    whileHover={{ scale: 1.04, y: -3 }}
-                    transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                    className={`${bg} border ${border} rounded-2xl p-5 text-center h-full`}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center mx-auto mb-3`}
-                    >
-                      <Icon className={`h-5 w-5 ${iconColor}`} />
-                    </div>
-                    <p className="font-bold text-gray-900 text-sm mb-1">
-                      {label}
-                    </p>
-                    <p className="text-xs text-gray-500 leading-snug">{desc}</p>
-                  </motion.div>
-                </StaggerItem>
-              ),
-            )}
-          </StaggerList>
-        </div>
-      </FadeIn>
-
-      {/* Trust strip */}
-      <FadeIn direction="up" delay={0.05}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="tool-step-grid">
           {[
             {
-              icon: Wifi,
-              title: "Real-Time Updates",
-              desc: "Pushed the moment a scan happens anywhere in the world.",
+              step: "01",
+              icon: Search,
+              title: "Find your number.",
+              desc: "Your tracking number is in your booking confirmation email and in your Shiprion dashboard.",
             },
             {
-              icon: ShieldCheck,
-              title: "End-to-End Visibility",
-              desc: "From first pickup to final signature — every milestone recorded.",
+              step: "02",
+              icon: RefreshCw,
+              title: "Track your order.",
+              desc: "Enter your number above to find the latest shipment status. No login is required for public tracking.",
             },
             {
+              step: "03",
               icon: Globe,
-              title: "180+ Countries",
-              desc: "Global coverage across air, sea, and road networks.",
+              title: "Follow the journey.",
+              desc: "View delivery milestones, location updates, and your estimated delivery date in one place.",
             },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="flex items-start gap-4 bg-white backdrop-blur-xl rounded-xl border border-gray-200 p-5"
-            >
-              <div className="w-9 h-9 rounded-lg bg-olive-500/10 border border-olive-500/20 flex items-center justify-center shrink-0">
-                <Icon className="h-4 w-4 text-olive-400" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 text-sm mb-0.5">
-                  {title}
-                </p>
-                <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
-              </div>
-            </div>
+          ].map(({ step, icon: Icon, title, desc }) => (
+            <article className="tool-step" key={step}>
+              <span>{step} /</span>
+              <Icon aria-hidden="true" />
+              <h3>{title}</h3>
+              <p>{desc}</p>
+            </article>
           ))}
         </div>
-      </FadeIn>
-
-      {/* FAQ */}
-      <FadeIn direction="up" delay={0.05}>
-        <div className="bg-white backdrop-blur-xl rounded-2xl border border-gray-200 p-6 sm:p-8">
-          <p className="text-xs font-bold text-olive-400 tracking-widest uppercase mb-2">
-            Got Questions?
+      </section>
+      <section className="tool-cta" data-reveal>
+        <div>
+          <h2>Your next move.</h2>
+          <p>
+            Planning another shipment? Get a shipping estimate for your route
+            and cargo.
           </p>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
-            Frequently asked
+        </div>
+        <a href="/calculator">
+          Shipping rate calculator
+          <ArrowUpRight size={32} />
+        </a>
+      </section>
+      <section className="tool-section tool-faq" data-reveal>
+        <div>
+          <p className="tool-eyebrow">Tracking / FAQ</p>
+          <h2>
+            A little more
+            <br />
+            clarity.
           </h2>
-          <div className="divide-y divide-white/[0.06]">
-            {FAQS.map((faq) => (
-              <FaqItem key={faq.q} {...faq} />
-            ))}
-          </div>
         </div>
-      </FadeIn>
-
-      {/* Support CTA */}
-      <FadeIn direction="up" delay={0.05}>
-        <div className="bg-white backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-gray-900 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <div className="flex-1">
-            <p className="text-olive-400 text-xs font-bold tracking-widest uppercase mb-2">
-              Still need help?
-            </p>
-            <h3 className="text-xl font-extrabold mb-2">
-              Our support team is 24/7
-            </h3>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Can't find your shipment or need an urgent update? Our logistics
-              specialists are available around the clock.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 shrink-0 w-full sm:w-auto">
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setLocation("/contact")}
-              className="flex items-center justify-center gap-2 bg-olive-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-olive-400 transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" /> Contact Support
-            </motion.button>
-            <div className="flex gap-2">
-              <a
-                href="tel:+18001234567"
-                className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-white/20 transition-colors text-xs font-medium px-3 py-2 rounded-lg"
-              >
-                <Phone className="h-3.5 w-3.5" /> Call Us
-              </a>
-              <a
-                href="mailto:support@shiprion.com"
-                className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-white/20 transition-colors text-xs font-medium px-3 py-2 rounded-lg"
-              >
-                <Mail className="h-3.5 w-3.5" /> Email
-              </a>
-            </div>
-          </div>
+        <div>
+          {FAQS.map((faq) => (
+            <FaqItem key={faq.q} {...faq} />
+          ))}
         </div>
-      </FadeIn>
+      </section>
+      <section
+        className="tool-cta"
+        style={{ background: "#151515", marginBottom: 56 }}
+        data-reveal
+      >
+        <div>
+          <h2>We’re here to help.</h2>
+          <p>
+            Can’t find your shipment? Share your tracking number with our
+            support team.
+          </p>
+        </div>
+        <a href="/contact">
+          Contact Shiprion
+          <ArrowUpRight size={32} />
+        </a>
+      </section>
     </div>
   );
 }
@@ -1131,7 +931,7 @@ export default function TrackPage() {
     : null;
 
   return (
-    <div className="min-h-[100dvh] bg-white">
+    <ToolLayout page="track">
       <Helmet>
         <title>
           {shipment
@@ -1184,7 +984,7 @@ export default function TrackPage() {
               "@context": "https://schema.org",
               "@type": "WebPage",
               url: "https://shiprion.com/track",
-              name: "Track Your Shipment | Shiprion",
+              name: "Track Your Order | Shiprion",
               description:
                 "Real-time shipment tracking for Shiprion packages worldwide.",
               potentialAction: {
@@ -1208,45 +1008,36 @@ export default function TrackPage() {
         @keyframes ringPulse  { 0%{opacity:0.15}50%{opacity:0.45}100%{opacity:0.15} }
         @keyframes outerGlow  { 0%,100%{box-shadow:0 0 0 0 rgba(56,189,248,0),0 0 18px 2px rgba(56,189,248,0.18)} 50%{box-shadow:0 0 0 4px rgba(56,189,248,0.07),0 0 28px 6px rgba(56,189,248,0.28)} }
       `}</style>
-      <PublicNavbar />
-      <div className="bg-gray-50 border-b border-gray-200 py-10 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-blue-200 hover:text-gray-900 hover:bg-blue-800 gap-1"
-                data-testid="button-back-home"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Home
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4 mb-6">
-            <RadarAnimation size={72} />
-            <div>
-              <h1
-                className="text-2xl font-bold text-gray-900"
-                data-testid="text-track-title"
-              >
-                Track Your Package
-              </h1>
-              <p className="text-blue-300 text-sm">
-                Enter your tracking number below
-              </p>
-            </div>
-          </div>
-
-          <TrackingInput initial={trackingNumber} />
-        </div>
-      </div>
-
-      <div
-        className={!trackingNumber ? "" : "max-w-3xl mx-auto px-4 sm:px-6 py-8"}
+      <ToolHero
+        label="Track your order"
+        title={
+          <>
+            Your cargo.
+            <br />
+            <em>In motion.</em>
+          </>
+        }
+        description="Follow your shipment from the first pickup to the final delivery. One tracking number. Every milestone."
       >
+        <a className="tool-link" href="/contact">
+          Need help with tracking?
+          <ArrowUpRight size={20} />
+        </a>
+      </ToolHero>
+      <section
+        className="tool-shell tool-search-wrap"
+        aria-label="Track a shipment"
+        data-reveal
+      >
+        <p>ENTER YOUR TRACKING NUMBER</p>
+        <TrackingInput initial={trackingNumber} />
+        <small>
+          Find your number in your booking confirmation. Example:
+          SHP-20260426-AB1234
+        </small>
+      </section>
+
+      <div className={!trackingNumber ? "" : "tool-shell tracking-details"}>
         {!trackingNumber ? (
           <TrackIdleContent />
         ) : isLoading ? (
@@ -1593,6 +1384,6 @@ export default function TrackPage() {
           </div>
         )}
       </div>
-    </div>
+    </ToolLayout>
   );
 }

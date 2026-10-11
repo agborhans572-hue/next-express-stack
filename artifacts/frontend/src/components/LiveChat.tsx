@@ -26,8 +26,10 @@ interface ChatSession {
 
 export default function LiveChat({
   forceOpen = false,
+  openRequest = 0,
 }: {
   forceOpen?: boolean;
+  openRequest?: number;
 }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -35,11 +37,11 @@ export default function LiveChat({
   const openRef = useRef(false);
 
   useEffect(() => {
-    if (forceOpen && user) {
+    if ((forceOpen || openRequest > 0) && user) {
       setOpen(true);
       setMinimized(false);
     }
-  }, [forceOpen, user]);
+  }, [forceOpen, openRequest, user]);
 
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
