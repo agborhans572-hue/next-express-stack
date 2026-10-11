@@ -1,8 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const fullStack = process.env.E2E_FULL === "true";
+const localStorage = process.env.E2E_LOCAL_STORAGE === "true";
+const preview = process.env.E2E_PREVIEW === "true";
+const frontendCommand = preview
+  ? "corepack pnpm --filter @workspace/frontend exec vite preview --host 127.0.0.1 --port 5174 --strictPort"
+  : "corepack pnpm --filter @workspace/frontend dev";
 const manageServers = process.env.E2E_EXTERNAL_SERVERS !== "true";
-const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:5173";
+const baseURL =
+  process.env.E2E_BASE_URL ?? `http://127.0.0.1:${preview ? 5174 : 5173}`;
 const databaseUrl =
   process.env.DATABASE_URL ??
   "postgresql://postgres:postgres@127.0.0.1:5432/shiprion_test";
@@ -27,6 +33,15 @@ export default defineConfig({
     ? undefined
     : fullStack
       ? [
+          ...(localStorage
+            ? [
+                {
+                  command: "node e2e/fixtures/s3-server.mjs",
+                  url: "http://127.0.0.1:9214/healthz",
+                  reuseExistingServer: false,
+                },
+              ]
+            : []),
           {
             command: "corepack pnpm --filter @workspace/api-server dev:e2e",
             url: "http://127.0.0.1:8080/api/healthz",
@@ -46,10 +61,20 @@ export default defineConfig({
                 process.env.SEED_CUSTOMER_PASSWORD ?? "Customer-E2E-Password!1",
               SEED_ADMIN_PASSWORD:
                 process.env.SEED_ADMIN_PASSWORD ?? "Admin-E2E-Password!1",
+              ...(localStorage
+                ? {
+                    S3_ENDPOINT: "http://127.0.0.1:9214",
+                    S3_BUCKET: "shiprion-browser-tests",
+                    S3_REGION: "us-east-1",
+                    S3_FORCE_PATH_STYLE: "true",
+                    S3_ACCESS_KEY_ID: "local-browser-test",
+                    S3_SECRET_ACCESS_KEY: "local-browser-test",
+                  }
+                : {}),
             },
           },
           {
-            command: "corepack pnpm --filter @workspace/frontend dev",
+            command: frontendCommand,
             url: baseURL,
             timeout: 120_000,
             reuseExistingServer: !process.env.CI,
@@ -61,7 +86,7 @@ export default defineConfig({
           },
         ]
       : {
-          command: "corepack pnpm --filter @workspace/frontend dev",
+          command: frontendCommand,
           url: baseURL,
           timeout: 60_000,
           reuseExistingServer: true,

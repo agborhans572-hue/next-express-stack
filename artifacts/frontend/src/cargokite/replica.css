@@ -1,0 +1,423 @@
+/* Behavior and accessibility additions to the locally scoped reference layout. */
+body.cargokite-document {
+  background: #fff;
+  color: #151515;
+}
+.cargokite-root .ck-word {
+  display: inline-block;
+}
+.cargokite-root {
+  font-family: CargoKiteHelveticaNowDisplay, Helvetica, Arial, sans-serif;
+  color: #151515;
+  font-size: 1.6rem;
+  line-height: 1.6;
+}
+.cargokite-root a:focus-visible,
+.cargokite-root button:focus-visible,
+.cargokite-root input:focus-visible,
+.cargokite-root textarea:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 5px;
+}
+.cargokite-root .popup[aria-hidden="true"] {
+  visibility: hidden;
+}
+.cargokite-root .popup[aria-hidden="false"] {
+  visibility: visible;
+}
+.cargokite-root .faq-item.active .faq-item__body .txt {
+  display: block;
+}
+.cargokite-root .news-hero__load-btn.hidden {
+  display: none;
+}
+.cargokite-root .header.on-scroll .header__typo-1,
+.cargokite-root .header.on-scroll .header__typo-2 {
+  opacity: 0;
+}
+.cargokite-root .header.on-scroll .header__links {
+  display: none;
+}
+.cargokite-root .ck-form-status {
+  margin-top: 1.2rem;
+  grid-column: 1 / -1;
+}
+.cargokite-root .footer .ck-form-status {
+  color: #fff;
+}
+.cargokite-root form[aria-busy="true"] button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.cargokite-root .popup__main-submit.success {
+  cursor: pointer;
+}
+.cargokite-root .tech-vid.ck-playing .tech-vid__main-vid {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+.cargokite-root .tech-vid.ck-playing .tech-vid__main-thumbnail {
+  opacity: 0;
+}
+.cargokite-root .tech-vid.ck-playing .tech-vid__play-btn {
+  display: none;
+}
+.cargokite-root .tech-vid__main,
+.cargokite-root .tech-vid__main-inner {
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+.cargokite-root .home-hero__bg-vid {
+  z-index: 1;
+}
+.cargokite-root .home-hero__bg-ship {
+  z-index: 3;
+}
+.cargokite-root video.ck-media-unavailable,
+.cargokite-root .home-hero__bg-wrap .home-hero__bg-vid.ck-media-unavailable {
+  opacity: 0;
+}
+.cargokite-root
+  .home-hero__bg-wrap:has(.ck-media-unavailable)
+  .home-hero__bg-ph {
+  display: block;
+  opacity: 1;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.cargokite-root
+  .tech-vid.ck-playing:has(.ck-media-unavailable)
+  .tech-vid__main-thumbnail {
+  opacity: 1;
+}
+.cargokite-root .tech-vid__main-inner:has(.ck-media-unavailable),
+.cargokite-root .tech-vid__holder-inner:has(.ck-media-unavailable) {
+  background: #013a54 url("/cargokite/tech-video-poster.jpg") center / cover
+    no-repeat;
+}
+.cargokite-root .ck-video-status {
+  grid-column: 2 / -1;
+  margin-top: 1rem;
+}
+.cargokite-root #awwwards {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.cargokite-root .ck-hero-kite {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cargokite-root .ck-rigging-only .ck-kite-canopy {
+  display: none;
+}
+.cargokite-root .ck-kite-mobile {
+  display: none;
+}
+.cargokite-root .ck-hero-wire {
+  position: absolute;
+  left: 50%;
+  width: 1px;
+  top: 43%;
+  height: 29%;
+  background: #d6dfe36b;
+  transform: rotate(2deg);
+  transform-origin: bottom;
+}
+.cargokite-root .tech-demo__canvas-inner > div,
+.cargokite-root .home-hero__canvas > div {
+  width: 100%;
+  height: 100%;
+}
+.cargokite-root .tech-demo__canvas-inner canvas,
+.cargokite-root .home-hero__canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.cargokite-root .ck-vessel-fallback {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+.cargokite-root[data-vessel-phase="5"] .tech-demo__canvas {
+  opacity: 0;
+}
+.cargokite-root[data-vessel-phase="5"] .tech-demo__dash-upper-item {
+  opacity: 1;
+}
+.cargokite-root .leaflet-container {
+  background: #111b22;
+}
+.cargokite-root .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.65) contrast(1.2);
+}
+.cargokite-root .leaflet-container img.leaflet-tile {
+  mix-blend-mode: normal;
+}
+.cargokite-root .leaflet-control-attribution {
+  font:
+    11px/1.5 Arial,
+    sans-serif;
+  background: #fff;
+  color: #222;
+}
+.cargokite-root .leaflet-control-attribution a {
+  color: #006892;
+}
+.cargokite-root
+  .tech-intro__map-main
+  .leaflet-control-container
+  .leaflet-bottom.leaflet-right {
+  display: block;
+}
+.cargokite-root
+  .tech-intro__map-main
+  .leaflet-control-container
+  .leaflet-top.leaflet-left {
+  opacity: 1;
+  transform: none;
+}
+.cargokite-root .tech-intro__map-form .ck-port-open .input-drop {
+  display: block;
+}
+.cargokite-root .port-item[hidden] {
+  display: none !important;
+}
+.cargokite-root .port-item:focus-visible {
+  color: #fff;
+  background: #ffffff0d;
+  outline-offset: -3px;
+}
+.cargokite-root .ck-route-status {
+  margin-top: 2rem;
+}
+.cargokite-root .ck-study-link {
+  margin-top: 2rem;
+  align-self: flex-start;
+}
+/* The reference cookie stylesheet is shared with its consent markup. */
+.cargokite-root .show--consent #cc_div #cm {
+  opacity: 1;
+  visibility: visible;
+}
+.cargokite-root .ck-consent-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.ck-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  pointer-events: none;
+}
+.ck-transition > div {
+  background: #ff471d;
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+.cargokite-root .abt-intro__gallery-inner {
+  transition: transform 0.6s ease;
+}
+@media (min-width: 768px) {
+  .cargokite-root .ck-split-heading {
+    line-height: 1em;
+  }
+  .cargokite-root .ck-split-heading::before,
+  .cargokite-root .ck-split-heading::after {
+    content: "";
+    display: block;
+    height: 0.1em;
+  }
+}
+@media (min-width: 992px) {
+  .cargokite-root .header.on-scroll .header__toggle {
+    display: block;
+    width: 5rem;
+    height: 5rem;
+    background: #f6f6f6;
+    position: relative;
+    margin-right: 0.8rem;
+    order: 1;
+  }
+  .cargokite-root .header.on-scroll.dark-mode .header__toggle {
+    background: #ffffff0d;
+  }
+  .cargokite-root .header.on-scroll .header__toggle > * {
+    visibility: hidden;
+  }
+  .cargokite-root .header.on-scroll .header__toggle::before {
+    content: "";
+    position: absolute;
+    left: 1.5rem;
+    top: 1.8rem;
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+    box-shadow:
+      0 0.6rem currentColor,
+      0 1.2rem currentColor;
+  }
+  .cargokite-root .header.on-scroll .header_act {
+    order: 2;
+    margin-left: 0;
+  }
+  .cargokite-root .header.on-scroll .header__nav {
+    display: block;
+    position: absolute;
+    right: 6rem;
+    top: 3.2rem;
+    width: 49rem;
+    background: #1d1d1d;
+    color: #fff;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cargokite-root .header.on-scroll.open-nav .header__nav {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .cargokite-root .header.on-scroll .header__nav ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    list-style: none;
+  }
+  .cargokite-root .header.on-scroll .header__nav-link {
+    display: flex;
+    align-items: flex-end;
+    padding: 2rem;
+    min-height: 12rem;
+    background: #ffffff0d;
+  }
+  .cargokite-root .header.on-scroll .header__nav-link.active {
+    background: #ff471d;
+  }
+  .cargokite-root .header.on-scroll .header__nav-item:last-child {
+    display: none;
+  }
+  .cargokite-root .header.on-scroll.open-nav .header__toggle {
+    color: #fff;
+    z-index: 4;
+  }
+  .cargokite-root .header.on-scroll.open-nav .header__toggle::before {
+    top: 2.5rem;
+    transform: rotate(45deg);
+    box-shadow: none;
+  }
+  .cargokite-root .header.on-scroll.open-nav .header__toggle::after {
+    content: "";
+    position: absolute;
+    left: 1.5rem;
+    top: 2.5rem;
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+    transform: rotate(-45deg);
+  }
+}
+@media (max-width: 767px) {
+  .cargokite-root .ck-kite-desktop {
+    display: none;
+  }
+  .cargokite-root .ck-kite-mobile {
+    display: block;
+  }
+  .cargokite-root .wrapper.ck-dialog-open {
+    overflow: hidden;
+  }
+  .cargokite-root .ck-cookie {
+    bottom: 1em;
+    right: 1em;
+    max-width: calc(100% - 2em);
+  }
+  .cargokite-root .tech-demo__canvas-inner {
+    min-height: 60svh;
+  }
+}
+.cargokite-root
+  .abt-team__main-item:focus-within
+  .abt-team__main-item-line-inner {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cargokite-root .abt-mil__wrap,
+  .cargokite-root .abt-mil__main,
+  .cargokite-root .abt-mil__main-inner {
+    height: auto;
+    overflow: visible;
+    mask-image: none;
+  }
+  .cargokite-root .abt-mil__ship {
+    display: none;
+  }
+  .cargokite-root .tech-demo__canvas {
+    position: relative;
+    height: 70svh;
+    grid-area: auto;
+  }
+  .cargokite-root .tech-demo__main {
+    grid-area: auto;
+  }
+  .cargokite-root .tech-demo__main-outer,
+  .cargokite-root .tech-demo__main-inner {
+    height: auto;
+    position: relative;
+    mask-image: none;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  .cargokite-root .tech-demo__main-item {
+    opacity: 1;
+    min-height: 0;
+    padding: 3rem 0;
+    transform: none !important;
+    display: flex;
+    flex-direction: column;
+    grid-area: auto;
+  }
+  .cargokite-root .tech-demo__main-item-richtext {
+    display: flex;
+  }
+  .cargokite-root .tech-demo__main-item-toggle {
+    display: none;
+  }
+  .cargokite-root *,
+  .cargokite-root *::before,
+  .cargokite-root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cargokite-root .home-hero__wrap {
+    height: 100svh;
+    margin-bottom: 0;
+  }
+  .cargokite-root .home-shift__main {
+    height: auto;
+  }
+  .cargokite-root .home-shift__main-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .cargokite-root .home-shift__main-part {
+    height: 70svh;
+  }
+  .cargokite-root .home-shift__img-wrap {
+    left: 0 !important;
+    max-width: 100%;
+  }
+  .cargokite-root .home-shift__main-part--small-ship {
+    display: none;
+  }
+}

@@ -43,6 +43,8 @@ import type {
   ListQuotesParams,
   ListShipmentsParams,
   LoginBody,
+  NewsletterSubscriptionBody,
+  NewsletterSubscriptionResponse,
   NotificationPage,
   OfferQuoteBody,
   PresignUploadBody,
@@ -75,6 +77,96 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * @summary Subscribe to the newsletter
+ */
+export const getSubscribeNewsletterUrl = () => {
+  return `/api/newsletter/subscriptions`;
+};
+
+export const subscribeNewsletter = async (
+  newsletterSubscriptionBody: NewsletterSubscriptionBody,
+  options?: RequestInit,
+): Promise<NewsletterSubscriptionResponse> => {
+  return customFetch<NewsletterSubscriptionResponse>(
+    getSubscribeNewsletterUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(newsletterSubscriptionBody),
+    },
+  );
+};
+
+export const getSubscribeNewsletterMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    TError,
+    { data: BodyType<NewsletterSubscriptionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof subscribeNewsletter>>,
+  TError,
+  { data: BodyType<NewsletterSubscriptionBody> },
+  TContext
+> => {
+  const mutationKey = ["subscribeNewsletter"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    { data: BodyType<NewsletterSubscriptionBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return subscribeNewsletter(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubscribeNewsletterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof subscribeNewsletter>>
+>;
+export type SubscribeNewsletterMutationBody =
+  BodyType<NewsletterSubscriptionBody>;
+export type SubscribeNewsletterMutationError = ErrorType<void>;
+
+/**
+ * @summary Subscribe to the newsletter
+ */
+export const useSubscribeNewsletter = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    TError,
+    { data: BodyType<NewsletterSubscriptionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof subscribeNewsletter>>,
+  TError,
+  { data: BodyType<NewsletterSubscriptionBody> },
+  TContext
+> => {
+  return useMutation(getSubscribeNewsletterMutationOptions(options));
+};
 
 /**
  * @summary Health check

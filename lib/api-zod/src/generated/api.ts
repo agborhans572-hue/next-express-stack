@@ -8,6 +8,19 @@
 import * as zod from "zod";
 
 /**
+ * @summary Subscribe to the newsletter
+ */
+export const subscribeNewsletterBodyEmailMax = 254;
+
+export const SubscribeNewsletterBody = zod.object({
+  email: zod.string().email().max(subscribeNewsletterBodyEmailMax),
+});
+
+export const SubscribeNewsletterResponse = zod.object({
+  subscribed: zod.boolean(),
+});
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

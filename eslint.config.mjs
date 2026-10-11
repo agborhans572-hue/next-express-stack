@@ -10,6 +10,7 @@ export default [
       "lib/api-zod/src/generated/**",
       "artifacts/mockup-sandbox/**",
       "public/**",
+      "artifacts/frontend/public/cargokite/**",
       ".cache/**",
       ".config/**",
       ".local/**",

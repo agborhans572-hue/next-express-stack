@@ -31,6 +31,28 @@ tags:
   - name: support
     description: Authenticated and guest support chat
 paths:
+  /newsletter/subscriptions:
+    post:
+      operationId: subscribeNewsletter
+      tags: [contact]
+      summary: Subscribe to the newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterSubscriptionBody"
+      responses:
+        "200":
+          description: Subscription received, including existing subscribers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterSubscriptionResponse"
+        "400":
+          description: Invalid email address
+        "429":
+          description: Too many requests
   /healthz:
     get:
       operationId: healthCheck
@@ -1606,6 +1628,22 @@ components:
           type: ["string", "null"]
           format: date-time
       required: [location, status, description]
+
+    NewsletterSubscriptionBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required: [email]
+
+    NewsletterSubscriptionResponse:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+      required: [subscribed]
 
     ContactBody:
       type: object

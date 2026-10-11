@@ -9,7 +9,7 @@ import { AuthProvider } from "@/context/auth";
 import { CookieBanner } from "@/components/cookie-banner";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
-const Home = lazy(() => import("@/pages/home"));
+const CargoKite = lazy(() => import("@/cargokite/CargoKite"));
 const Login = lazy(() => import("@/pages/login"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
@@ -18,10 +18,7 @@ const TrackPage = lazy(() => import("@/pages/track"));
 const Services = lazy(() => import("@/pages/services"));
 const Calculator = lazy(() => import("@/pages/calculator"));
 const Contact = lazy(() => import("@/pages/contact"));
-const About = lazy(() => import("@/pages/about"));
-const NewsPage = lazy(() => import("@/pages/news"));
 const NewsArticlePage = lazy(() => import("@/pages/news-article"));
-const PrivacyPolicy = lazy(() => import("@/pages/privacy"));
 const Terms = lazy(() => import("@/pages/terms"));
 const CookiePolicy = lazy(() => import("@/pages/cookies"));
 const FaqPage = lazy(() => import("@/pages/faq"));
@@ -73,14 +70,28 @@ function AnimatedSwitch() {
     <Suspense fallback={<PageLoader />}>
       <div key={location} style={{ minHeight: "100vh" }}>
         <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/about" component={About} />
+          <Route path="/">
+            <CargoKite page="home" />
+          </Route>
+          <Route path="/about">
+            <CargoKite page="about" />
+          </Route>
+          <Route path="/tech">
+            <CargoKite page="tech" />
+          </Route>
+          <Route path="/legal">
+            <CargoKite page="legal" />
+          </Route>
           <Route path="/news/:slug" component={NewsArticlePage} />
-          <Route path="/news" component={NewsPage} />
+          <Route path="/news">
+            <CargoKite page="news" />
+          </Route>
           <Route path="/services" component={Services} />
           <Route path="/calculator" component={Calculator} />
           <Route path="/contact" component={Contact} />
-          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/privacy">
+            <CargoKite page="privacy" />
+          </Route>
           <Route path="/terms" component={Terms} />
           <Route path="/cookies" component={CookiePolicy} />
           <Route path="/faq" component={FaqPage} />
@@ -110,7 +121,7 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <AuthProvider>
               <AnimatedSwitch />
-              <CookieBanner />
+              <LegacyCookieBanner />
             </AuthProvider>
           </WouterRouter>
           <Toaster />
@@ -118,6 +129,15 @@ function App() {
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
+  );
+}
+
+function LegacyCookieBanner() {
+  const [location] = useLocation();
+  return ["/", "/about", "/tech", "/news", "/privacy", "/legal"].includes(
+    location,
+  ) ? null : (
+    <CookieBanner />
   );
 }
 

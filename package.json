@@ -8,7 +8,7 @@
     "start": "corepack pnpm --filter @workspace/api-server run start",
     "prebuild": "corepack pnpm --filter @workspace/api-spec run codegen",
     "build": "corepack pnpm run typecheck && corepack pnpm -r --if-present run build",
-    "vercel-build": "corepack pnpm run verify:assets && corepack pnpm run build",
+    "vercel-build": "corepack pnpm run verify:assets && corepack pnpm run build && node ./scripts/migrate-vercel-production.mjs",
     "verify:assets": "node ./scripts/verify-static-assets.mjs",
     "test": "corepack pnpm -r --if-present run test",
     "test:e2e": "playwright test",

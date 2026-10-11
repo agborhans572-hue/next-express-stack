@@ -26,12 +26,28 @@ const referenced = new Set([
   "opengraph.jpg",
   "robots.txt",
   "sitemap.xml",
+  "cargokite/draco/draco_decoder.js",
+  "cargokite/draco/draco_wasm_wrapper.js",
+  "cargokite/draco/draco_decoder.wasm",
 ]);
 const files = [
   path.join(frontendRoot, "index.html"),
   ...(await sourceFiles(path.join(frontendRoot, "src"))),
 ];
-const localAsset = /["'`]\/([^"'`?#]+\.(?:webp|png|jpe?g|svg|xml|txt))/gi;
+const replicaManifest = path.join(
+  frontendRoot,
+  "src/cargokite/content/asset-manifest.json",
+);
+if (existsSync(replicaManifest)) {
+  for (const asset of Object.values(
+    JSON.parse(await readFile(replicaManifest, "utf8")),
+  )) {
+    if (typeof asset === "string" && asset.startsWith("/cargokite/"))
+      referenced.add(asset.slice(1));
+  }
+}
+const localAsset =
+  /["'`]\/([^"'`?#]+\.(?:webp|png|jpe?g|svg|xml|txt|mp4|glb|otf|woff2?))/gi;
 
 for (const file of files) {
   const contents = await readFile(file, "utf8");

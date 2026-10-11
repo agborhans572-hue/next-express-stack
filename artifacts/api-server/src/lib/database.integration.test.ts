@@ -20,9 +20,38 @@ test(
           "SELECT to_regclass('public.socket_io_attachments')::text AS \"tableName\"",
         );
         assert.equal(socketTable.rows[0]?.tableName, "socket_io_attachments");
+        const newsletterTable = await client.query<{
+          tableName: string | null;
+        }>(
+          "SELECT to_regclass('public.newsletter_subscriptions')::text AS \"tableName\"",
+        );
+        assert.equal(
+          newsletterTable.rows[0]?.tableName,
+          "newsletter_subscriptions",
+        );
       });
 
       await client.query("BEGIN");
+      await t.test(
+        "newsletter retries preserve one durable subscription",
+        async () => {
+          const email = `newsletter-${suffix}@example.com`;
+          await client.query(
+            "INSERT INTO newsletter_subscriptions(email) VALUES ($1) ON CONFLICT (email) DO NOTHING",
+            [email],
+          );
+          await client.query(
+            "INSERT INTO newsletter_subscriptions(email) VALUES ($1) ON CONFLICT (email) DO NOTHING",
+            [email],
+          );
+          const result = await client.query<{ count: string; created: Date }>(
+            "SELECT count(*)::text AS count, min(created_at) AS created FROM newsletter_subscriptions WHERE email=$1",
+            [email],
+          );
+          assert.equal(result.rows[0]?.count, "1");
+          assert.ok(result.rows[0]?.created);
+        },
+      );
       const userA = await client.query<{ id: number }>(
         "INSERT INTO users(email,password_hash,role,status,email_verified) VALUES ($1,'hash','customer','active',true) RETURNING id",
         [`a-${suffix}@example.com`],

@@ -1,7 +1,9 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
 const fullStack = process.env.E2E_FULL === "true";
-const origin = process.env.E2E_BASE_URL ?? "http://127.0.0.1:5173";
+const origin =
+  process.env.E2E_BASE_URL ??
+  `http://127.0.0.1:${process.env.E2E_PREVIEW === "true" ? 5174 : 5173}`;
 const stateChangingHeaders = { Origin: origin };
 
 async function json<T>(
@@ -20,7 +22,7 @@ test("public navigation, quote, tracking, and account screens render without con
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Track Order/i }).first(),
+    page.getByRole("link", { name: "Technology.", exact: true }).first(),
   ).toBeVisible();
 
   await page.goto("/calculator?origin=Nairobi&destination=Mombasa&weight=10");

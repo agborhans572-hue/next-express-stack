@@ -418,6 +418,15 @@ export interface CreateTrackingEventBody {
   occurredAt?: string | null;
 }
 
+export interface NewsletterSubscriptionBody {
+  /** @maxLength 254 */
+  email: string;
+}
+
+export interface NewsletterSubscriptionResponse {
+  subscribed: boolean;
+}
+
 export interface ContactBody {
   /**
    * @minLength 2
