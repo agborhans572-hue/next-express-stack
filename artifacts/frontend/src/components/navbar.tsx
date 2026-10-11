@@ -92,7 +92,7 @@ export function PublicNavbar() {
               }}
             />
           </div>
-          ShipRion<span className="text-olive-500">.</span>
+          Shiprion<span className="text-olive-500">.</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

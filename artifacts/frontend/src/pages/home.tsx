@@ -159,7 +159,7 @@ function Navbar() {
             />
           </div>
           <span className="hero-nav-label text-xl font-extrabold tracking-[-0.035em] text-[#13201f]">
-            ShipRion<span className="text-[#9cab31]">.</span>
+            Shiprion<span className="text-[#9cab31]">.</span>
           </span>
         </Link>
 

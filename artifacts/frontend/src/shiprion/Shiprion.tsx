@@ -29,17 +29,17 @@ import "./replica.css";
 
 const Vessel = lazy(() => import("./Vessel"));
 const templates = { home, about, tech, news, privacy, legal };
-export type CargoKitePage = keyof typeof templates;
-const titles: Record<CargoKitePage, string> = {
-  home: "CargoKite — Wind-powered shipping",
-  about: "About us — CargoKite",
-  tech: "Technology — CargoKite",
-  news: "News & Media — CargoKite",
-  privacy: "Privacy policy — CargoKite",
-  legal: "Legal notice — CargoKite",
+export type ShiprionPage = keyof typeof templates;
+const titles: Record<ShiprionPage, string> = {
+  home: "Shiprion — Wind-powered shipping",
+  about: "About us — Shiprion",
+  tech: "Technology — Shiprion",
+  news: "News & Media — Shiprion",
+  privacy: "Privacy policy — Shiprion",
+  legal: "Legal notice — Shiprion",
 };
 
-export default function CargoKite({ page }: { page: CargoKitePage }) {
+export default function Shiprion({ page }: { page: ShiprionPage }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
   const [modelHost, setModelHost] = useState<HTMLElement | null>(null);
@@ -66,7 +66,7 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
     () => (
       <div
         ref={rootRef}
-        className={`cargokite-root ck-page-${page}`}
+        className={`shiprion-root ck-page-${page}`}
         dangerouslySetInnerHTML={{ __html: templates[page] }}
       />
     ),
@@ -75,8 +75,8 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
   useLayoutEffect(() => {
     const root = rootRef.current!;
     const controller = new AbortController();
-    document.documentElement.classList.add("cargokite-document");
-    document.body.classList.add("cargokite-document");
+    document.documentElement.classList.add("shiprion-document");
+    document.body.classList.add("shiprion-document");
     const wrapper = root.querySelector<HTMLElement>(".wrapper")!;
     const header = root.querySelector<HTMLElement>(".header")!;
     const main = root.querySelector<HTMLElement>(".main")!;
@@ -482,7 +482,7 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
               throw new Error("Subscription did not complete.");
             form.dataset.submitted = "true";
             status.textContent =
-              "Thank you! You’re subscribed to CargoKite’s newsletter.";
+              "Thank you! You’re subscribed to Shiprion’s newsletter.";
             button.textContent = "Subscribed";
           } else {
             const name = String(values.get("name") ?? "").trim();
@@ -493,7 +493,7 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
                 email,
                 message:
                   kind === "study"
-                    ? `[CargoKite custom study enquiry]\n${message}`
+                    ? `[Shiprion custom study enquiry]\n${message}`
                     : message,
               },
               { signal: controller.signal },
@@ -551,8 +551,8 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
         .forEach((video) => video.pause());
       header.classList.remove("open-nav");
       motion.destroy();
-      document.documentElement.classList.remove("cargokite-document");
-      document.body.classList.remove("cargokite-document");
+      document.documentElement.classList.remove("shiprion-document");
+      document.body.classList.remove("shiprion-document");
     };
   }, [page, navigate, mobile, reduced]);
 
@@ -560,18 +560,20 @@ export default function CargoKite({ page }: { page: CargoKitePage }) {
     <>
       <Helmet>
         <title>{titles[page]}</title>
-        <link
-          rel="icon"
-          type="image/svg+xml"
-          href="/cargokite/c501c63860-logo-icon.0188e3e5.svg"
-        />
+        <link rel="icon" type="image/svg+xml" href="/shiprion/brand-icon.svg" />
         <meta
           name="description"
-          content="CargoKite is developing small, autonomous, wind-powered cargo ships for sustainable and economically viable commercial shipping."
+          content="Shiprion is developing small, autonomous, wind-powered cargo ships for sustainable and economically viable commercial shipping."
+        />
+        <meta property="og:title" content={titles[page]} />
+        <meta name="twitter:title" content={titles[page]} />
+        <link
+          rel="canonical"
+          href={`https://www.shiprion.com${page === "home" ? "/" : page === "tech" ? "/tech" : `/${page}`}`}
         />
       </Helmet>
       {markup}
-      <div className="cargokite-root">
+      <div className="shiprion-root">
         <CookieConsent
           onContact={() =>
             rootRef.current?.querySelector<HTMLElement>(".header__btn")?.click()

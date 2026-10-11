@@ -87,7 +87,7 @@ export default function AdminLogin() {
                 <Package className="h-5 w-5 text-white" />
               </div>
               <span className="font-bold text-xl text-white">
-                ShipRion<span className="text-olive-400">.</span>
+                Shiprion<span className="text-olive-400">.</span>
               </span>
             </div>
           </div>

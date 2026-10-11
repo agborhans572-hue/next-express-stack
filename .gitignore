@@ -21,7 +21,7 @@ out-tsc
 !/artifacts/frontend/public/images/hero-cargo-ship-3d.png
 /artifacts/frontend/public/*.jpeg
 /artifacts/frontend/public/hero-ref.jpg
-!/artifacts/frontend/public/cargokite/**
+!/artifacts/frontend/public/shiprion/**
 
 # dependencies
 node_modules

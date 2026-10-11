@@ -2,10 +2,10 @@ import { test, expect } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-test("CargoKite vessel and consent visual audit", async ({ page }) => {
+test("Shiprion vessel and consent visual audit", async ({ page }) => {
   test.skip(process.env.CK_VISUAL_AUDIT !== "true", "Opt-in screenshot audit");
   test.setTimeout(300_000);
-  const destination = path.resolve(".cache/cargokite/visual-updated");
+  const destination = path.resolve(".cache/shiprion/visual-updated");
   await mkdir(destination, { recursive: true });
   await page.route("**/api/auth/me", (route) =>
     route.fulfill({ status: 401, json: { message: "Not signed in" } }),
@@ -70,12 +70,12 @@ test("CargoKite vessel and consent visual audit", async ({ page }) => {
   }
 });
 
-test("CargoKite viewport and scroll-stage visual audit", async ({ page }) => {
+test("Shiprion viewport and scroll-stage visual audit", async ({ page }) => {
   test.skip(process.env.CK_VISUAL_AUDIT !== "true", "Opt-in screenshot audit");
   test.setTimeout(420_000);
   page.setDefaultTimeout(15_000);
   const destination = path.resolve(
-    process.env.CK_VISUAL_DIR ?? ".cache/cargokite/visual",
+    process.env.CK_VISUAL_DIR ?? ".cache/shiprion/visual",
   );
   await mkdir(destination, { recursive: true });
   await page.addInitScript(() =>

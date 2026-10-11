@@ -2,11 +2,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { initializeMap } from "./map";
-import type { CargoKitePage } from "./CargoKite";
+import type { ShiprionPage } from "./Shiprion";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function initializeMotion(root: HTMLElement, page: CargoKitePage) {
+export function initializeMotion(root: HTMLElement, page: ShiprionPage) {
   const wrapper = root.querySelector<HTMLElement>(".wrapper")!;
   const mobile = matchMedia("(max-width: 767px)").matches;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;

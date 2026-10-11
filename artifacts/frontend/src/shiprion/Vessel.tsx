@@ -23,8 +23,8 @@ import {
 } from "three";
 import containerPositions from "./content/vessel-containers.json";
 
-const modelUrl = "/cargokite/0bcf139b2d-cargo-new-pipe-dense.3754a503.glb";
-const heroModelUrl = "/cargokite/29b92f8cfb-cargo-hero-deform.2eb55ad8.glb";
+const modelUrl = "/shiprion/0bcf139b2d-cargo-new-pipe-dense.3754a503.glb";
+const heroModelUrl = "/shiprion/29b92f8cfb-cargo-hero-deform.2eb55ad8.glb";
 const environmentFiles = [
   "87f7b2b3c4-px.a7dcba4c.png",
   "53914c2a16-nx.b560611f.png",
@@ -33,7 +33,7 @@ const environmentFiles = [
   "4512fe48e7-pz.c2fa9fc7.png",
   "c4b6ca6e50-nz.24df2ce4.png",
 ];
-const fallbackUrl = "/cargokite/";
+const fallbackUrl = "/shiprion/";
 type Mode = "hero" | "technology";
 
 function HeroFallback({ riggingOnly = false }: { riggingOnly?: boolean }) {
@@ -87,9 +87,9 @@ function HeroFallback({ riggingOnly = false }: { riggingOnly?: boolean }) {
 function VesselScene({ mode, visible }: { mode: Mode; visible: boolean }) {
   const { scene } = useGLTF(
     mode === "hero" ? heroModelUrl : modelUrl,
-    "/cargokite/draco/",
+    "/shiprion/draco/",
   );
-  const environment = useCubeTexture(environmentFiles, { path: "/cargokite/" });
+  const environment = useCubeTexture(environmentFiles, { path: "/shiprion/" });
   const group = useRef<Group>(null);
   const { camera, gl, size, invalidate } = useThree();
   const lastPhase = useRef(-1);
@@ -103,7 +103,7 @@ function VesselScene({ mode, visible }: { mode: Mode; visible: boolean }) {
   }, [mode, visible, invalidate]);
   useEffect(() => {
     if (mode !== "technology") return;
-    const root = gl.domElement.closest<HTMLElement>(".cargokite-root");
+    const root = gl.domElement.closest<HTMLElement>(".shiprion-root");
     if (!root) return;
     const observer = new MutationObserver(() => {
       const next = Math.min(
@@ -200,7 +200,7 @@ function VesselScene({ mode, visible }: { mode: Mode; visible: boolean }) {
   const nextCamera = useMemo(() => new Vector3(), []);
   useFrame((_, delta) => {
     if (!group.current) return;
-    const root = gl.domElement.closest<HTMLElement>(".cargokite-root");
+    const root = gl.domElement.closest<HTMLElement>(".shiprion-root");
     const progress = Number(root?.dataset.vesselProgress ?? 0);
     const mobile = innerWidth < 768;
     if (mode === "hero") {
@@ -344,7 +344,7 @@ export default function Vessel({ mode }: { mode: Mode }) {
       <img
         className="ck-vessel-fallback"
         src={`${fallbackUrl}5cbd9b9781-ship-dark.8cbb4bd3.png`}
-        alt="CargoKite vessel"
+        alt="Shiprion vessel"
       />
     );
   if (!supported || lost) return fallback;
@@ -371,7 +371,7 @@ export default function Vessel({ mode }: { mode: Mode }) {
         dpr={[1, 1.5]}
         gl={{ alpha: true, antialias: true }}
         aria-label={
-          mode === "hero" ? "Wind propulsion kite" : "CargoKite vessel model"
+          mode === "hero" ? "Wind propulsion kite" : "Shiprion vessel model"
         }
         onCreated={({ gl }) => {
           gl.setClearAlpha(0);

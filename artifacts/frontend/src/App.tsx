@@ -9,7 +9,7 @@ import { AuthProvider } from "@/context/auth";
 import { CookieBanner } from "@/components/cookie-banner";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
-const CargoKite = lazy(() => import("@/cargokite/CargoKite"));
+const Shiprion = lazy(() => import("@/shiprion/Shiprion"));
 const Login = lazy(() => import("@/pages/login"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
@@ -71,26 +71,26 @@ function AnimatedSwitch() {
       <div key={location} style={{ minHeight: "100vh" }}>
         <Switch>
           <Route path="/">
-            <CargoKite page="home" />
+            <Shiprion page="home" />
           </Route>
           <Route path="/about">
-            <CargoKite page="about" />
+            <Shiprion page="about" />
           </Route>
           <Route path="/tech">
-            <CargoKite page="tech" />
+            <Shiprion page="tech" />
           </Route>
           <Route path="/legal">
-            <CargoKite page="legal" />
+            <Shiprion page="legal" />
           </Route>
           <Route path="/news/:slug" component={NewsArticlePage} />
           <Route path="/news">
-            <CargoKite page="news" />
+            <Shiprion page="news" />
           </Route>
           <Route path="/services" component={Services} />
           <Route path="/calculator" component={Calculator} />
           <Route path="/contact" component={Contact} />
           <Route path="/privacy">
-            <CargoKite page="privacy" />
+            <Shiprion page="privacy" />
           </Route>
           <Route path="/terms" component={Terms} />
           <Route path="/cookies" component={CookiePolicy} />

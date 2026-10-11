@@ -10,6 +10,37 @@ test.beforeEach(async ({ page }) => {
   if (await consent.isVisible()) await consent.click();
 });
 
+test("all marketing routes consistently use Shiprion branding and contact details", async ({
+  page,
+}) => {
+  for (const route of ["/", "/about", "/tech", "/news", "/privacy", "/legal"]) {
+    await page.goto(route);
+    await expect(
+      page.getByRole("link", { name: "Shiprion home", exact: true }),
+    ).toBeVisible();
+    await expect(page).toHaveTitle(/Shiprion/);
+    await expect(page.locator(".shiprion-root").first()).not.toContainText(
+      /cargo\s*kite|shiorion/i,
+    );
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
+      "content",
+      "Shiprion",
+    );
+    await expect(
+      page.locator('.footer a[href="mailto:support@shiprion.com"]'),
+    ).toHaveText("support@shiprion.com");
+    await expect(
+      page.locator('link[rel="icon"][href="/shiprion/brand-icon.svg"]'),
+    ).toHaveCount(1);
+    expect(
+      await page
+        .locator('img[src*="/cargokite/"], source[src*="/cargokite/"]')
+        .count(),
+    ).toBe(0);
+    expect(await page.locator("#awwwards").count()).toBe(0);
+  }
+});
+
 test("news reveals three entries at a time and retains external article destinations", async ({
   page,
 }) => {
@@ -198,8 +229,8 @@ test("mobile tile navigation, FAQ keyboard controls, and legacy document styles"
   await expect(
     page.getByRole("heading", { name: "Plan your shipment" }),
   ).toBeVisible();
-  await expect(page.locator("html")).not.toHaveClass(/cargokite-document/);
-  await expect(page.locator("body")).not.toHaveClass(/cargokite-document/);
+  await expect(page.locator("html")).not.toHaveClass(/shiprion-document/);
+  await expect(page.locator("body")).not.toHaveClass(/shiprion-document/);
 });
 
 test("direct routes, hidden careers, event details, and legal anchors remain usable", async ({
@@ -316,7 +347,7 @@ test("custom study enquiries use the existing contact API and retain details on 
       name: "Port Operator",
       email: "operator@example.com",
       message:
-        "[CargoKite custom study enquiry]\nRotterdam to Hamburg, two departures per week.",
+        "[Shiprion custom study enquiry]\nRotterdam to Hamburg, two departures per week.",
     });
     return route.fulfill(
       requests === 1
@@ -422,7 +453,7 @@ test("unavailable WebGL keeps the vessel explanation and image fallback usable",
   });
   await page.goto("/tech");
   await expect(
-    page.getByAltText("CargoKite vessel", { exact: true }),
+    page.getByAltText("Shiprion vessel", { exact: true }),
   ).toBeAttached();
   await expect(page.locator(".tech-demo__main-item")).toHaveCount(6);
   await page.locator(".header__btn").click();
@@ -459,7 +490,7 @@ test("a failed vessel model request preserves the explanation and contact dialog
   await page.route("**/*.glb", (route) => route.abort());
   await page.goto("/tech");
   await expect(
-    page.getByAltText("CargoKite vessel", { exact: true }),
+    page.getByAltText("Shiprion vessel", { exact: true }),
   ).toBeAttached();
   await expect(page.locator(".tech-demo__main-item")).toHaveCount(6);
   await page.locator(".header__btn").click();

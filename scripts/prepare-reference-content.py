@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 root = Path(__file__).resolve().parent.parent
-audit = root / '.cache/cargokite'
-output = root / 'artifacts/frontend/src/cargokite/content'
+audit = root / '.cache/shiprion'
+output = audit / 'reference-content'
 output.mkdir(parents=True, exist_ok=True)
 assets = json.loads((audit / 'asset-map.json').read_text(encoding='utf8'))
 
@@ -101,7 +101,7 @@ for page in ['home', 'about', 'tech', 'news', 'privacy', 'legal']:
         popup['aria-hidden'] = 'true'
         popup['inert'] = ''
         popup['tabindex'] = '-1'
-        popup['aria-label'] = 'Event details' if 'event' in popup.get('class', []) else 'Contact CargoKite'
+        popup['aria-label'] = 'Event details' if 'event' in popup.get('class', []) else 'Contact Shiprion'
     for form in soup.select('.popup__main-form'):
         form['data-ck-form'] = 'study' if form.find_parent(class_='download') else 'contact'
         for field in form.select('input, textarea'):

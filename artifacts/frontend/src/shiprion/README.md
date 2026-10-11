@@ -1,20 +1,24 @@
-# CargoKite replica in Shiprion
+# Shiprion marketing frontend
 
 The six public routes `/`, `/about`, `/tech`, `/news`, `/privacy`, and `/legal`
-use locally stored content observed at https://cargokite.com on October 11, 2026.
+use locally stored layouts observed at https://cargokite.com on October 11, 2026,
+with Shiprion branding, wordmarks, metadata, and the existing Shiprion contact details.
+The reference site's award badge and company registration identifiers have been
+removed. Third-party article destinations and asset-manifest source URLs retain
+their real addresses for link integrity and source attribution.
 Shipping, tracking, calculator, account, dashboard, support, and admin routes retain
 their existing implementations.
 
 `content/` contains sanitized HTML, the scoped reference stylesheet, the asset
-manifest, and port coordinates. `public/cargokite/` contains the original images,
+manifest, and port coordinates. `public/shiprion/` contains the original images,
 SVGs, videos, Helvetica Now Display fonts, and the Draco-compressed hero and vessel models.
 The technology renderer uses the original camera waypoints, environment textures,
 container coordinates, and the solid/wireframe material stages. The video error
 poster is a frame extracted from the original technology preview video.
 The Draco decoder is copied from the installed Three.js distribution and is served
-locally. No CargoKite CMS or original application JavaScript is required at runtime.
+locally. No Shiprion CMS or original application JavaScript is required at runtime.
 
-`CargoKite.tsx` handles navigation, accessible menus/dialogs, FAQ, news pagination,
+`Shiprion.tsx` handles navigation, accessible menus/dialogs, FAQ, news pagination,
 and forms. `motion.ts` owns GSAP/ScrollTrigger and Lenis lifecycles. `Vessel.tsx`
 renders the local GLB and supplies fallbacks for unavailable WebGL or model loading.
 The original consent and preference presentation is implemented in `CookieConsent.tsx`.
@@ -22,7 +26,7 @@ The original consent and preference presentation is implemented in `CookieConsen
 Reference styles, fonts, animations, and document changes are scoped to replica routes.
 
 Contact and study forms use the existing `/api/contact` persistence and support
-email workflow. Study messages begin with `[CargoKite custom study enquiry]`.
+email workflow. Study messages begin with `[Shiprion custom study enquiry]`.
 Newsletter signup uses `/api/newsletter/subscriptions`; normalized addresses are
 stored uniquely, retries succeed, and failures retain the entered value. Apply
 `lib/db/migrations/0004_newsletter_subscriptions.sql` through the existing migration
@@ -53,19 +57,19 @@ Production browser verification (PowerShell):
 
 ```powershell
 $env:E2E_PREVIEW='true'
-corepack pnpm test:e2e e2e/cargokite.spec.ts --workers=1
+corepack pnpm test:e2e e2e/shiprion-marketing.spec.ts --workers=1
 $env:CK_VISUAL_AUDIT='true'
-corepack pnpm test:e2e e2e/cargokite.visual.spec.ts --workers=1
+corepack pnpm test:e2e e2e/shiprion-marketing.visual.spec.ts --workers=1
 ```
 
 The visual audit writes screenshots and a broken-image/layout report under
-`.cache/cargokite/visual` at 1500×865, 390×844, 820×1180, and 1920×1080. It covers
+`.cache/shiprion/visual` at 1500×865, 390×844, 820×1180, and 1920×1080. It covers
 sections, fleet/vessel/milestone scroll stages, menus, contact/study/event dialogs,
 and FAQ expansion. The live reference was inspected in the browser; captures are
 stored in the ignored audit directory. The completed six-page audit includes 276
 screenshots across 24 page/viewport combinations, with no broken images or
 horizontal overflow. Updated vessel and consent captures are stored separately
-in `.cache/cargokite/visual-updated` (27 captures; the updated audit passed). The requested <1% screenshot difference has
+in `.cache/shiprion/visual-updated` (27 captures; the updated audit passed). The requested <1% screenshot difference has
 not been certified. A sampled headline mask comparison exceeded that target, and
 video frames and camera trajectories require a separately synchronized comparison.
 
@@ -74,7 +78,8 @@ The existing complete shipping regression supports `E2E_FULL=true`. Set
 downloads. This fixture validates application storage behavior, not S3 signatures
 or production provider credentials.
 
-`scripts/download-cargokite-assets.mjs` and `scripts/prepare-cargokite-content.py`
-can regenerate the replica from browser DOM/asset captures in `.cache/cargokite`.
-They do not access a CMS. The Python helper requires BeautifulSoup. Format regenerated
-source with Prettier before running repository checks.
+`scripts/download-reference-assets.mjs` and `scripts/prepare-reference-content.py`
+process browser DOM/asset captures in `.cache/shiprion`. The HTML helper writes
+reference templates to `.cache/shiprion/reference-content` for review, so source
+captures cannot overwrite the production Shiprion wordmark or contact details.
+They do not access a CMS. The Python helper requires BeautifulSoup.

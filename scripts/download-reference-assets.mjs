@@ -4,9 +4,9 @@ import { mkdir, readFile, readdir, writeFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const audit = path.join(root, ".cache/cargokite");
-const assetsDir = path.join(root, "artifacts/frontend/public/cargokite");
-const contentDir = path.join(root, "artifacts/frontend/src/cargokite/content");
+const audit = path.join(root, ".cache/shiprion");
+const assetsDir = path.join(root, "artifacts/frontend/public/shiprion");
+const contentDir = path.join(root, "artifacts/frontend/src/shiprion/content");
 await mkdir(assetsDir, { recursive: true });
 await mkdir(contentDir, { recursive: true });
 const urls = new Set();
@@ -94,7 +94,7 @@ await Promise.all(
             Buffer.from(await response.arrayBuffer()),
           );
         }
-        manifest[url] = `/cargokite/${name}`;
+        manifest[url] = `/shiprion/${name}`;
       } catch (error) {
         failures.push({ url, reason: String(error) });
       }
@@ -126,7 +126,7 @@ if (failures.length) {
       animationNames.set(original, rule.params);
     }
   });
-  const fontName = "CargoKiteHelveticaNowDisplay";
+  const fontName = "ShiprionHelveticaNowDisplay";
   ast.walkDecls((declaration) => {
     if (/^(?:-webkit-)?animation(?:-name)?$/.test(declaration.prop)) {
       for (const [original, scoped] of animationNames)
@@ -154,7 +154,7 @@ if (failures.length) {
     if (rule.parent.type === "atrule" && /keyframes$/.test(rule.parent.name))
       return;
     if (rule.selector === ":root") {
-      rule.selector = ".cargokite-root";
+      rule.selector = ".shiprion-root";
       return;
     }
     rule.selector = rule.selector
@@ -162,8 +162,8 @@ if (failures.length) {
       .map((selector) => {
         const value = selector.trim();
         if (/^(html|body)(?=[:.\s]|$)/.test(value))
-          return value.replace(/^(html|body)/, "$1.cargokite-document");
-        return `.cargokite-root ${value}`;
+          return value.replace(/^(html|body)/, "$1.shiprion-document");
+        return `.shiprion-root ${value}`;
       })
       .join(",");
   });
@@ -176,6 +176,6 @@ if (failures.length) {
     JSON.stringify(manifest, null, 2),
   );
   console.log(
-    `Downloaded and verified ${Object.keys(manifest).length} original CargoKite assets.`,
+    `Downloaded and verified ${Object.keys(manifest).length} reference assets.`,
   );
 }

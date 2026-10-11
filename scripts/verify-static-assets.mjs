@@ -26,9 +26,9 @@ const referenced = new Set([
   "opengraph.jpg",
   "robots.txt",
   "sitemap.xml",
-  "cargokite/draco/draco_decoder.js",
-  "cargokite/draco/draco_wasm_wrapper.js",
-  "cargokite/draco/draco_decoder.wasm",
+  "shiprion/draco/draco_decoder.js",
+  "shiprion/draco/draco_wasm_wrapper.js",
+  "shiprion/draco/draco_decoder.wasm",
 ]);
 const files = [
   path.join(frontendRoot, "index.html"),
@@ -36,13 +36,13 @@ const files = [
 ];
 const replicaManifest = path.join(
   frontendRoot,
-  "src/cargokite/content/asset-manifest.json",
+  "src/shiprion/content/asset-manifest.json",
 );
 if (existsSync(replicaManifest)) {
   for (const asset of Object.values(
     JSON.parse(await readFile(replicaManifest, "utf8")),
   )) {
-    if (typeof asset === "string" && asset.startsWith("/cargokite/"))
+    if (typeof asset === "string" && asset.startsWith("/shiprion/"))
       referenced.add(asset.slice(1));
   }
 }
