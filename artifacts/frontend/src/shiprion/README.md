@@ -34,6 +34,14 @@ and forms. `motion.ts` owns GSAP/ScrollTrigger and Lenis lifecycles. `Vessel.tsx
 renders the local GLB and supplies fallbacks for unavailable WebGL or model loading.
 The original consent and preference presentation is implemented in `CookieConsent.tsx`.
 `team.ts` handles desktop portrait motion and accessible phone/tablet team profiles.
+`supporters.ts` reproduces the two opposing logo loops, scroll direction and speed
+changes, and staggered section reveals. Loops use 40/30/20-second cycles and six,
+five, or three tiles across the content width on desktop, tablet, and phone.
+Reduced motion shows all supporters in a static grid; breakpoint changes and
+navigation remove cloned groups, text splits, listeners, and animation state.
+`e2e/shiprion-supporters.spec.ts` checks real-time movement, scroll acceleration and
+reversal, the loop seam, four viewport sizes, live motion-preference changes, and
+cleanup after account navigation.
 Reference styles, fonts, animations, and document changes are scoped to replica routes.
 
 Contact and study forms use the existing `/api/contact` persistence and support

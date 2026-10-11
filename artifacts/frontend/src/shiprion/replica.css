@@ -1,4 +1,42 @@
 /* Behavior and accessibility additions to the locally scoped reference layout. */
+.shiprion-root .home-part__marquee-item {
+  flex: 0 0 auto;
+  will-change: transform;
+}
+.shiprion-root
+  .home-part__main-supporters
+  .home-part__marquee-item
+  .home-part__main-item {
+  flex: 0 0 auto;
+  width: var(--ck-supporter-width, 30rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .shiprion-root .home-part__marquee-wrapper.--left {
+    display: none;
+  }
+  .shiprion-root .home-part__marquee-item {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    width: 100%;
+    will-change: auto;
+  }
+  .shiprion-root
+    .home-part__main-supporters
+    .home-part__marquee-item
+    .home-part__main-item {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 991px) {
+  .shiprion-root .home-part__marquee-item {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .shiprion-root .home-part__marquee-item {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 body.shiprion-document {
   background: #fff;
   color: #151515;

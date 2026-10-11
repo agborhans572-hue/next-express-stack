@@ -2,6 +2,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { initializeMap } from "./map";
+import { initializeSupporters } from "./supporters";
 import type { ShiprionPage } from "./Shiprion";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -39,6 +40,7 @@ export function initializeMotion(root: HTMLElement, page: ShiprionPage) {
   scroller.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
   const options = { scroller: mobile ? wrapper : undefined };
+  const destroySupporters = initializeSupporters(root, lenis);
   const context = gsap.context(() => {
     if (!reduced) {
       const heading = root.querySelector(".main h1");
@@ -294,6 +296,7 @@ export function initializeMotion(root: HTMLElement, page: ShiprionPage) {
     },
     destroy: () => {
       disposed = true;
+      destroySupporters();
       map.destroy();
       root
         .querySelectorAll<HTMLElement>(".tech-demo__main-item")
