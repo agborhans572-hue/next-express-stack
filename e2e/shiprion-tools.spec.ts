@@ -71,6 +71,7 @@ test.beforeEach(async ({ page }) => {
 test("original footer links are available on all marketing and shipping pages", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1500, height: 865 });
   const links = {
     Home: "/",
     "About Us": "/about",
@@ -88,7 +89,8 @@ test("original footer links are available on all marketing and shipping pages", 
     "Shipping Policy": "/shipping-policy",
     "Insurance Policy": "/insurance-policy",
     FAQ: "/faq",
-    "Create Account": "/login",
+    Login: "/login",
+    "Create Account": "/login?tab=register",
   };
   for (const path of [
     "/",
@@ -117,6 +119,76 @@ test("original footer links are available on all marketing and shipping pages", 
     await expect(
       page.locator('header a[href="/contact"]').first(),
     ).toBeAttached();
+    const account = page.getByRole("navigation", {
+      name: "Account navigation",
+      exact: true,
+    });
+    await expect(
+      account.getByRole("link", { name: "Login", exact: true }),
+    ).toBeVisible();
+    await expect(
+      account.getByRole("link", { name: "Sign up", exact: true }),
+    ).toBeVisible();
+  }
+  await page
+    .locator("footer")
+    .getByRole("link", { name: "Create Account", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/login\?tab=register$/);
+  await expect(page.getByTestId("form-register")).toBeVisible();
+});
+
+test("signed-in customers and staff get their dashboard link instead of guest account links", async ({
+  page,
+}) => {
+  for (const role of ["customer", "admin"]) {
+    await page.route("**/api/auth/me", (route) =>
+      route.fulfill({
+        json: {
+          id: 1,
+          email: "account@example.test",
+          role,
+          status: "active",
+          emailVerified: true,
+          fullName: "Account Test",
+          phone: null,
+          company: null,
+          createdAt: "2026-10-11T10:00:00Z",
+          updatedAt: "2026-10-11T10:00:00Z",
+        },
+      }),
+    );
+    for (const path of ["/", "/track"]) {
+      await page.setViewportSize({ width: 1500, height: 865 });
+      await page.goto(path);
+      const account = page.getByRole("navigation", {
+        name: "Account navigation",
+        exact: true,
+      });
+      await expect(
+        account.getByRole("link", { name: "My dashboard", exact: true }),
+      ).toHaveAttribute("href", role === "customer" ? "/dashboard" : "/admin");
+      await expect(
+        account.getByRole("link", { name: "Login", exact: true }),
+      ).toBeHidden();
+      await expect(
+        account.getByRole("link", { name: "Sign up", exact: true }),
+      ).toBeHidden();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page
+        .getByRole("button", { name: "Toggle navigation", exact: true })
+        .click();
+      const menu = page.locator(".header__nav, .tool-menu");
+      await expect(
+        menu.getByRole("link", { name: "My dashboard.", exact: true }),
+      ).toHaveAttribute("href", role === "customer" ? "/dashboard" : "/admin");
+      await expect(
+        menu.getByRole("link", { name: "Login.", exact: true }),
+      ).toBeHidden();
+      await expect(
+        menu.getByRole("link", { name: "Sign up.", exact: true }),
+      ).toBeHidden();
+    }
   }
 });
 
@@ -414,10 +486,33 @@ test("mobile navigation supports keyboard use and document styles clean up betwe
     .click();
   await expect(page.locator("body")).not.toHaveClass(/shiprion-tools-document/);
   await expect(page.locator("html")).toHaveClass(/shiprion-document/);
+  await page
+    .getByRole("button", { name: "Toggle navigation", exact: true })
+    .click();
+  await page
+    .locator(".header__nav")
+    .getByRole("link", { name: "Sign up.", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/login\?tab=register$/);
+  await expect(
+    page.getByRole("heading", { name: "Create your account", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("html")).not.toHaveClass(/shiprion-document/);
+  await page.goto("/news");
   await page.locator('.footer a[href="/contact"]').first().click();
   await expect(page).toHaveURL(/\/contact$/);
   await expect(page.locator("html")).not.toHaveClass(/shiprion-document/);
   await expect(page.locator(".tool-contact-form")).not.toHaveAttribute("inert");
+  await page
+    .getByRole("button", { name: "Toggle navigation", exact: true })
+    .click();
+  await page
+    .getByRole("navigation", { name: "Expanded navigation" })
+    .getByRole("link", { name: "Login.", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByTestId("form-login")).toBeVisible();
+  await expect(page.locator("body")).not.toHaveClass(/shiprion-tools-document/);
 });
 
 test("shipping layouts stay within the viewport at mobile, tablet, desktop, and wide sizes", async ({

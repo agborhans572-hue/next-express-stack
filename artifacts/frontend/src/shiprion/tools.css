@@ -52,7 +52,7 @@ body.shiprion-tools-document {
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 22px;
   padding: 28px 40px;
   background: #fff;
   transition:
@@ -77,7 +77,7 @@ body.shiprion-tools-document {
 }
 .tool-desktop-nav {
   display: flex;
-  gap: clamp(14px, 1.6vw, 30px);
+  gap: clamp(12px, 1.2vw, 24px);
   align-items: center;
   font-size: 14px;
 }
@@ -89,6 +89,23 @@ body.shiprion-tools-document {
 .tool-desktop-nav a:hover,
 .tool-desktop-nav a[aria-current] {
   color: #ff471d;
+}
+.tool-account-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.tool-account-links a {
+  transition: color 0.2s;
+}
+.tool-account-links a:hover {
+  color: #ff471d;
+}
+.tool-signup-link {
+  border: 1px solid currentColor;
+  padding: 11px 16px;
 }
 .tool-contact-link {
   padding: 12px 20px;
@@ -859,7 +876,7 @@ body.shiprion-tools-document {
 .tool-support-chat [class*="rounded-xl"] {
   border-radius: 0;
 }
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .tool-desktop-nav {
     display: none;
   }
@@ -868,6 +885,9 @@ body.shiprion-tools-document {
   }
 }
 @media (max-width: 991px) {
+  .tool-account-links {
+    display: none;
+  }
   .tool-hero {
     padding-top: 144px;
   }

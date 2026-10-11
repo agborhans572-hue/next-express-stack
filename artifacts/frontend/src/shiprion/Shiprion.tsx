@@ -10,6 +10,7 @@ import {
 import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "wouter";
+import { useAuth } from "@/context/auth";
 import {
   subscribeNewsletter,
   submitContact,
@@ -47,6 +48,7 @@ const titles: Record<ShiprionPage, string> = {
 export default function Shiprion({ page }: { page: ShiprionPage }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
+  const { user } = useAuth();
   const [modelHost, setModelHost] = useState<HTMLElement | null>(null);
   const [heroHost, setHeroHost] = useState<HTMLElement | null>(null);
   const [mobile, setMobile] = useState(
@@ -77,6 +79,25 @@ export default function Shiprion({ page }: { page: ShiprionPage }) {
     ),
     [page],
   );
+  useLayoutEffect(() => {
+    const root = rootRef.current!;
+    root
+      .querySelectorAll<HTMLElement>("[data-account-guest]")
+      .forEach((item) => {
+        item.hidden = Boolean(user);
+      });
+    root
+      .querySelectorAll<HTMLElement>("[data-account-member]")
+      .forEach((item) => {
+        item.hidden = !user;
+        const link =
+          item instanceof HTMLAnchorElement
+            ? item
+            : item.querySelector<HTMLAnchorElement>("a");
+        if (link)
+          link.href = user?.role === "customer" ? "/dashboard" : "/admin";
+      });
+  }, [page, user]);
   useLayoutEffect(() => {
     const root = rootRef.current!;
     const controller = new AbortController();

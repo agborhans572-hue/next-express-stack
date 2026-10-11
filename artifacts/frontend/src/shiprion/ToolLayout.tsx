@@ -15,7 +15,7 @@ import { ArrowUpRight, Mail, Menu, X } from "lucide-react";
 import { subscribeNewsletter, ApiError } from "@workspace/api-client-react";
 import { useAuth } from "@/context/auth";
 import CookieConsent from "./CookieConsent";
-import { footerGroups, shippingLinks } from "./navigation";
+import { accountLinks, footerGroups, shippingLinks } from "./navigation";
 import "./content/reference.css";
 import "./replica.css";
 import "./tools.css";
@@ -342,6 +342,28 @@ export default function ToolLayout({
               </a>
             ))}
           </nav>
+          <nav className="tool-account-links" aria-label="Account navigation">
+            {user ? (
+              <a
+                className="tool-signup-link"
+                href={user.role === "customer" ? "/dashboard" : "/admin"}
+              >
+                My dashboard
+              </a>
+            ) : (
+              accountLinks.map(([label, href]) => (
+                <a
+                  key={href}
+                  className={
+                    label === "Sign up" ? "tool-signup-link" : undefined
+                  }
+                  href={href}
+                >
+                  {label}
+                </a>
+              ))
+            )}
+          </nav>
           <a className="tool-contact-link" href="/contact">
             Get in touch
           </a>
@@ -368,9 +390,18 @@ export default function ToolLayout({
                 {label}.<ArrowUpRight />
               </a>
             ))}
-            <a href={user ? "/dashboard" : "/login"}>
-              {user ? "My dashboard" : "My account"}.<ArrowUpRight />
-            </a>
+            {user ? (
+              <a href={user.role === "customer" ? "/dashboard" : "/admin"}>
+                My dashboard.
+                <ArrowUpRight />
+              </a>
+            ) : (
+              accountLinks.map(([label, href]) => (
+                <a key={href} href={href}>
+                  {label}.<ArrowUpRight />
+                </a>
+              ))
+            )}
             <a href="/about#job">
               Career.
               <ArrowUpRight />

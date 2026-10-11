@@ -94,6 +94,15 @@ regression scenarios against the production build, including the full quote,
 customer, staff, admin, tracking, delivery proof, recovery, and support lifecycle.
 All 13 marketing interaction scenarios also passed against the production build.
 
+Desktop account navigation and mobile menus expose Login (`/login`) and Sign up
+(`/login?tab=register`). The original Create Account footer destination now opens
+registration directly, and Login is also available in the footer. Signed-in users
+see their customer or staff dashboard in the header and menu. `account.css` scopes
+the orange palette, local Helvetica fonts, and form styling to the account page;
+the existing login, email verification, and registration APIs remain in use.
+`e2e/shiprion-account.spec.ts` checks responsive account screens, registration errors,
+email verification, and signing in with the newly created account.
+
 The existing complete shipping regression supports `E2E_FULL=true`. Set
 `E2E_LOCAL_STORAGE=true` to use the local test-only S3 fixture for proof uploads and
 downloads. This fixture validates application storage behavior, not S3 signatures

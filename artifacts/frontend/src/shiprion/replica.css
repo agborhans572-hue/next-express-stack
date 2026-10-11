@@ -4,11 +4,38 @@ body.shiprion-document {
   color: #151515;
 }
 .shiprion-root .header__links-inner {
-  column-gap: 2.2rem;
+  column-gap: 1.8rem;
 }
 .shiprion-root .header__links {
   --default-width: 112rem;
   margin-right: 2rem;
+}
+.shiprion-root .header__account-links {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  margin-right: 2rem;
+  color: rgba(var(--header-txt), 1);
+  white-space: nowrap;
+}
+.shiprion-root .header__account-links a {
+  transition: opacity 0.2s;
+}
+.shiprion-root .header__account-links a:hover {
+  opacity: 0.65;
+}
+.shiprion-root .header__signup {
+  border: 1px solid currentColor;
+  padding: 1.3rem 1.6rem;
+}
+.shiprion-root [data-account-guest][hidden],
+.shiprion-root [data-account-member][hidden] {
+  display: none !important;
+}
+@media (max-width: 991px) {
+  .shiprion-root .header__account-links {
+    display: none;
+  }
 }
 .shiprion-root .shipping-footer-links {
   display: grid;

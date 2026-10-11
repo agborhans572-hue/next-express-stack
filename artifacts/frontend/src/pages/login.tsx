@@ -15,7 +15,6 @@ import {
   Eye,
   EyeOff,
   UserPlus,
-  Package,
   CheckCircle2,
   ArrowRight,
   AlertCircle,
@@ -27,8 +26,18 @@ import { useLogin, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth";
 import { apiFetch } from "@/lib/api";
+import "@/shiprion/account.css";
 
 type Tab = "login" | "register";
+
+function AccountBrand() {
+  return (
+    <a className="account-brand" href="/" aria-label="Shiprion home">
+      <img src="/shiprion/brand-icon.svg" width={36} height={36} alt="" />
+      <span>Shiprion</span>
+    </a>
+  );
+}
 
 function StrengthBar({ password }: { password: string }) {
   const score =
@@ -67,15 +76,19 @@ function StrengthBar({ password }: { password: string }) {
 }
 
 function FieldRow({
+  id,
   label,
   children,
 }: {
+  id: string;
   label: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-sm font-medium text-gray-500">{label}</Label>
+      <Label htmlFor={id} className="text-sm font-medium text-gray-500">
+        {label}
+      </Label>
       {children}
     </div>
   );
@@ -266,7 +279,7 @@ export default function Login() {
     "h-11 bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-olive-500/50 focus:ring-olive-500/20";
 
   return (
-    <div className="min-h-[100dvh] w-full flex bg-white">
+    <div className="shiprion-account min-h-[100dvh] w-full flex bg-white">
       <Helmet>
         <title>
           {tab === "login" ? "Sign In — Shiprion" : "Create Account — Shiprion"}
@@ -276,21 +289,13 @@ export default function Login() {
           content="Sign in to your Shiprion account or create a new account to track shipments, manage deliveries, and access 24/7 support."
         />
         <meta name="robots" content="noindex, nofollow" />
+        <link rel="icon" type="image/svg+xml" href="/shiprion/brand-icon.svg" />
       </Helmet>
 
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[44%] bg-gray-50 px-12 py-14 relative overflow-hidden border-r border-gray-200">
-        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-olive-500/8 rounded-full blur-[180px] animate-orb pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[140px] animate-orb-alt pointer-events-none" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-
+      <div className="account-panel hidden lg:flex flex-col justify-between w-[44%] bg-gray-50 px-12 py-14 relative overflow-hidden border-r border-gray-200">
         <div className="relative z-10 flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-olive-500 rounded-lg flex items-center justify-center glow-olive-sm">
-            <Package className="h-5 w-5 text-gray-900" />
-          </div>
-          <span className="text-gray-900 font-bold text-xl tracking-tight">
-            Shiprion<span className="text-olive-400">.</span>
-          </span>
+          <AccountBrand />
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -330,20 +335,13 @@ export default function Login() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="account-form-panel flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex justify-center mb-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-olive-500 rounded-lg flex items-center justify-center glow-olive-sm">
-                <Package className="h-4 w-4 text-gray-900" />
-              </div>
-              <span className="font-bold text-xl text-gray-900">
-                Shiprion<span className="text-olive-400">.</span>
-              </span>
-            </div>
+            <AccountBrand />
           </div>
 
-          <div className="bg-white backdrop-blur-xl rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="account-card bg-white backdrop-blur-xl rounded-2xl border border-gray-200 overflow-hidden">
             {!regPending && (
               <div className="grid grid-cols-2 border-b border-gray-200">
                 {(["login", "register"] as Tab[]).map((t) => (
@@ -443,11 +441,15 @@ export default function Login() {
 
                         <form onSubmit={handleVerify} className="space-y-4">
                           <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-500">
+                            <Label
+                              htmlFor="verify-code"
+                              className="text-sm font-medium text-gray-500"
+                            >
                               Verification code
                             </Label>
                             <div className="flex justify-center">
                               <InputOTP
+                                id="verify-code"
                                 maxLength={6}
                                 value={verifyCode}
                                 onChange={(val) => {
@@ -558,8 +560,9 @@ export default function Login() {
                       className="space-y-4"
                       data-testid="form-login"
                     >
-                      <FieldRow label="Email address">
+                      <FieldRow id="login-email" label="Email address">
                         <Input
+                          id="login-email"
                           type="email"
                           placeholder="you@example.com"
                           value={loginEmail}
@@ -570,9 +573,10 @@ export default function Login() {
                         />
                       </FieldRow>
 
-                      <FieldRow label="Password">
+                      <FieldRow id="login-password" label="Password">
                         <div className="relative">
                           <Input
+                            id="login-password"
                             type={showLoginPassword ? "text" : "password"}
                             placeholder="Enter your password"
                             value={loginPassword}
@@ -667,8 +671,9 @@ export default function Login() {
                       className="space-y-4"
                       data-testid="form-register"
                     >
-                      <FieldRow label="Email address">
+                      <FieldRow id="register-email" label="Email address">
                         <Input
+                          id="register-email"
                           type="email"
                           placeholder="you@example.com"
                           value={regEmail}
@@ -678,9 +683,10 @@ export default function Login() {
                         />
                       </FieldRow>
 
-                      <FieldRow label="Password">
+                      <FieldRow id="register-password" label="Password">
                         <div className="relative">
                           <Input
+                            id="register-password"
                             type={showRegPassword ? "text" : "password"}
                             placeholder="Create a strong password"
                             value={regPassword}
@@ -708,9 +714,10 @@ export default function Login() {
                         <StrengthBar password={regPassword} />
                       </FieldRow>
 
-                      <FieldRow label="Confirm password">
+                      <FieldRow id="register-confirm" label="Confirm password">
                         <div className="relative">
                           <Input
+                            id="register-confirm"
                             type={showRegConfirm ? "text" : "password"}
                             placeholder="Repeat your password"
                             value={regConfirm}
@@ -736,37 +743,12 @@ export default function Login() {
                       </FieldRow>
 
                       <label className="flex items-start gap-3 cursor-pointer group">
-                        <div className="relative mt-0.5 shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={agreedToTerms}
-                            onChange={(e) => setAgreedToTerms(e.target.checked)}
-                            className="sr-only"
-                          />
-                          <div
-                            className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                              agreedToTerms
-                                ? "bg-olive-500 border-olive-500"
-                                : "border-gray-300 bg-white group-hover:border-olive-400"
-                            }`}
-                          >
-                            {agreedToTerms && (
-                              <svg
-                                className="w-2.5 h-2.5 text-white"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
+                        <input
+                          type="checkbox"
+                          checked={agreedToTerms}
+                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                          className="account-terms-checkbox"
+                        />
                         <span className="text-xs text-gray-500 leading-relaxed">
                           I agree to the{" "}
                           <a

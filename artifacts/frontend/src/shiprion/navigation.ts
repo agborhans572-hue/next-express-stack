@@ -18,7 +18,8 @@ export const footerGroups = [
       ["Ocean Freight", "/services"],
       ["Rate Calculator", "/calculator"],
       ["Contact Us", "/contact"],
-      ["Create Account", "/login"],
+      ["Login", "/login"],
+      ["Create Account", "/login?tab=register"],
     ],
   },
   {
@@ -39,6 +40,11 @@ export const shippingLinks = [
   ["Track order", "/track"],
   ["Shipping calculator", "/calculator"],
   ["Contact Shiprion", "/contact"],
+] as const;
+
+export const accountLinks = [
+  ["Login", "/login"],
+  ["Sign up", "/login?tab=register"],
 ] as const;
 
 /** Add the original shipping destinations to every locally captured page. */
@@ -70,12 +76,30 @@ export function withShippingNavigation(template: string) {
           .join("")}${end}`,
     )
     .replace(
+      /(<div class="header_act">)/,
+      `<nav class="header__account-links" aria-label="Account navigation">${accountLinks
+        .map(
+          ([label, href]) =>
+            `<a class="txt txt-16${label === "Sign up" ? " header__signup" : ""}" data-account-guest href="${href}">${label}</a>`,
+        )
+        .join(
+          "",
+        )}<a class="txt txt-16 header__signup" data-account-member hidden href="/dashboard">My dashboard</a></nav>$1`,
+    )
+    .replace(
       /(<li class="header__nav-item">\s*<a class="h6 header__nav-cta)/,
       `${shippingLinks
         .map(
           ([label, href]) =>
             `<li class="header__nav-item"><a class="header__nav-link txt txt-16 txt-med" href="${href}">${label}.</a></li>`,
         )
-        .join("")}$1`,
+        .join("")}${accountLinks
+        .map(
+          ([label, href]) =>
+            `<li class="header__nav-item" data-account-guest><a class="header__nav-link txt txt-16 txt-med" href="${href}">${label}.</a></li>`,
+        )
+        .join(
+          "",
+        )}<li class="header__nav-item" data-account-member hidden><a class="header__nav-link txt txt-16 txt-med" href="/dashboard">My dashboard.</a></li>$1`,
     );
 }

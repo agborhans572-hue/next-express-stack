@@ -1,0 +1,152 @@
+@font-face {
+  font-family: ShiprionHelveticaNowDisplay;
+  src: url("/shiprion/ff15a35ac1-HelveticaNowDisplay.c3034e01.otf");
+  font-display: swap;
+}
+@font-face {
+  font-family: ShiprionHelveticaNowDisplay;
+  src: url("/shiprion/f9717ca0f8-HelveticaNowDisplayMedium.947709e3.otf");
+  font-weight: 500;
+  font-display: swap;
+}
+.shiprion-account {
+  font-family: ShiprionHelveticaNowDisplay, Helvetica, Arial, sans-serif;
+  color: #151515;
+}
+.shiprion-account .bg-olive-500 {
+  background-color: #ff471d;
+}
+.shiprion-account .text-olive-400,
+.shiprion-account .text-olive-500 {
+  color: #c83010;
+}
+.shiprion-account [class~="bg-olive-500/10"] {
+  background-color: #ff471d1a;
+}
+.shiprion-account .border-olive-500 {
+  border-color: #ff471d;
+}
+.shiprion-account [class~="border-olive-500/20"] {
+  border-color: #ff471d33;
+}
+.account-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: #151515;
+}
+.account-brand img {
+  flex-shrink: 0;
+}
+.shiprion-account .account-panel {
+  background: #e9eef0;
+  padding: 40px clamp(40px, 4vw, 80px);
+  border: 0;
+}
+.account-panel h2 {
+  font-size: clamp(48px, 4.4vw, 80px);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+  font-weight: 400;
+}
+.shiprion-account .text-gradient-olive {
+  background: none;
+  color: #ff471d;
+  -webkit-text-fill-color: currentColor;
+}
+.account-panel h2 + p {
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 370px;
+  padding-top: 12px;
+}
+.shiprion-account .account-form-panel {
+  padding: 64px 40px;
+}
+.shiprion-account .account-card {
+  border-radius: 0;
+  border: 0;
+}
+.account-card > .p-7 {
+  padding: 32px 0 0;
+}
+.account-card h1 {
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+.account-card h1 + p {
+  font-size: 16px;
+  padding-top: 8px;
+}
+.account-card input:not([type="checkbox"]),
+.account-card button[type="submit"] {
+  height: 52px;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 16px;
+}
+.account-card input:not([type="checkbox"]) {
+  background: #fff;
+  border-color: #c7c7c7;
+  padding-inline: 16px;
+}
+.account-card input.pr-10 {
+  padding-right: 40px;
+}
+.account-card input::placeholder {
+  color: #777;
+}
+.account-card button[type="submit"] {
+  color: #151515;
+  border-color: #ff471d;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.account-card button[type="submit"]:hover {
+  background: #151515;
+  border-color: #151515;
+  color: #fff;
+}
+.shiprion-account a:focus-visible,
+.shiprion-account button:focus-visible,
+.shiprion-account input:focus-visible {
+  outline: 2px solid #ff471d;
+  outline-offset: 4px;
+}
+.account-card input:focus-visible {
+  --tw-ring-color: #ff471d30;
+  border-color: #ff471d;
+}
+.account-terms-checkbox {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-top: 2px;
+  accent-color: #ff471d;
+  cursor: pointer;
+}
+@media (max-width: 767px) {
+  .shiprion-account .account-form-panel {
+    padding: 40px 24px;
+  }
+  .account-card h1 {
+    font-size: 34px;
+  }
+  .account-brand {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shiprion-account *,
+  .shiprion-account *::before,
+  .shiprion-account *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0.01ms !important;
+  }
+}

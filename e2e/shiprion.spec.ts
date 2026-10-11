@@ -24,6 +24,12 @@ test("public navigation, quote, tracking, and account screens render without con
   await expect(
     page.getByRole("link", { name: "Technology.", exact: true }).first(),
   ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Account navigation", exact: true })
+    .getByRole("link", { name: "Login", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByTestId("form-login")).toBeVisible();
 
   await page.goto("/calculator?origin=Nairobi&destination=Mombasa&weight=10");
   await expect(
