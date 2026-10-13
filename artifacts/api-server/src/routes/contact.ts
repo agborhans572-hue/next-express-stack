@@ -13,6 +13,8 @@ import { getIO } from "../socket";
 import { persistentRateLimit } from "../lib/rate-limit";
 import { z } from "zod";
 import { escapeHtml } from "../lib/security";
+import { companyInboxEmail } from "../lib/company-inbox";
+import { dispatchQueuedEmails } from "../lib/outbox";
 
 const router: IRouter = Router();
 const CONTACT_PAGE_SIZE = 50;
@@ -81,6 +83,7 @@ router.post("/contact", contactLimit, async (req, res): Promise<void> => {
   }
 
   const { name, email, message } = parsed.data;
+  const emailIds: number[] = [];
 
   const saved = await db.transaction(async (tx) => {
     const [created] = await tx
@@ -106,21 +109,30 @@ router.post("/contact", contactLimit, async (req, res): Promise<void> => {
           href: "/admin",
         })),
       );
-    await tx.insert(emailOutboxTable).values({
-      toEmail: email,
-      subject: "Shiprion - We received your message",
-      html: `<div style="font-family:sans-serif"><h2>We received your message</h2><p>Hi ${escapeHtml(name)}, our support team will get back to you as soon as possible.</p></div>`,
-    });
-    if (process.env.SUPPORT_EMAIL)
-      await tx.insert(emailOutboxTable).values({
-        toEmail: process.env.SUPPORT_EMAIL,
-        subject: `Shiprion - Contact request ${created!.id}`,
-        html: `<div style="font-family:sans-serif"><h2>New contact request</h2><p>From: ${escapeHtml(name)} (${escapeHtml(email)})</p><p>${escapeHtml(message)}</p></div>`,
-      });
+    const [confirmation] = await tx
+      .insert(emailOutboxTable)
+      .values({
+        toEmail: email,
+        subject: "Shiprion - We received your message",
+        html: `<div style="font-family:sans-serif"><h2>We received your message</h2><p>Hi ${escapeHtml(name)}, our support team will get back to you as soon as possible.</p></div>`,
+      })
+      .returning({ id: emailOutboxTable.id });
+    const [notification] = await tx
+      .insert(emailOutboxTable)
+      .values(
+        companyInboxEmail(`Contact request ${created!.id}`, {
+          Name: name,
+          Email: email,
+          Message: message,
+        }),
+      )
+      .returning({ id: emailOutboxTable.id });
+    emailIds.push(notification!.id, confirmation!.id);
     return created!;
   });
 
   req.log.info({ id: saved.id }, "Contact message received");
+  await dispatchQueuedEmails(emailIds);
 
   try {
     getIO().to("staff").emit("contactMessageCreated", { id: saved.id });

@@ -136,7 +136,7 @@ function ToolFooter() {
             </div>
             <div>
               <small>Email</small>
-              <a href="mailto:support@shiprion.com">support@shiprion.com</a>
+              <a href="mailto:info@shiprion.com">info@shiprion.com</a>
               <small>Phone</small>
               <a href="tel:+18007948374">+1 (800) 794-8374</a>
             </div>

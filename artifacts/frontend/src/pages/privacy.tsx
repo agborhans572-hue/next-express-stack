@@ -150,7 +150,7 @@ const SECTIONS: Array<{
         ],
       },
       {
-        text: "To exercise any of these rights, contact our Data Protection Officer at privacy@shiprion.com or through the Contact Us page. We respond to all verified requests within 30 days.",
+        text: "To exercise any of these rights, contact our Data Protection Officer at info@shiprion.com or through the Contact Us page. We respond to all verified requests within 30 days.",
       },
     ],
   },
@@ -176,7 +176,7 @@ const SECTIONS: Array<{
     title: "8. Children's Privacy",
     content: [
       {
-        text: "Our services are not directed to individuals under the age of 16. We do not knowingly collect personal information from children. If we discover that we have inadvertently collected data from a child under 16, we will promptly delete it and notify the relevant parent or guardian. If you believe a child has provided us with personal data, please contact us immediately at privacy@shiprion.com.",
+        text: "Our services are not directed to individuals under the age of 16. We do not knowingly collect personal information from children. If we discover that we have inadvertently collected data from a child under 16, we will promptly delete it and notify the relevant parent or guardian. If you believe a child has provided us with personal data, please contact us immediately at info@shiprion.com.",
       },
     ],
   },
@@ -331,10 +331,10 @@ export default function PrivacyPolicy() {
                   <Mail className="h-4 w-4" /> Contact Us
                 </Link>
                 <a
-                  href="mailto:privacy@shiprion.com"
+                  href="mailto:info@shiprion.com"
                   className="text-sm text-olive-400 hover:text-olive-300 transition-colors"
                 >
-                  privacy@shiprion.com
+                  info@shiprion.com
                 </a>
               </div>
             </div>

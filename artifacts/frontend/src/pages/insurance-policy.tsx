@@ -110,7 +110,7 @@ const SECTIONS: Array<{
         subtitle: "Step-by-Step Claims Process",
         text: "To submit a claim for a lost, stolen, or damaged shipment, follow these steps:",
         list: [
-          "Step 1: Report the issue within 7 days of the delivery date (or expected delivery date for lost shipments) via your dashboard or by emailing claims@shiprion.com",
+          "Step 1: Report the issue within 7 days of the delivery date (or expected delivery date for lost shipments) via your dashboard or by emailing info@shiprion.com",
           "Step 2: Provide your tracking number, shipment details, and a detailed description of the loss or damage",
           "Step 3: Upload supporting documentation including photos of damage, original packaging, and proof of value",
           "Step 4: Our claims team will acknowledge your submission within 2 business days and assign a case number",
@@ -158,7 +158,7 @@ const SECTIONS: Array<{
       },
       {
         subtitle: "Appeals Process",
-        text: "If your claim is denied and you believe this decision is incorrect, you may appeal within 14 days of the denial notice by submitting a written appeal with additional evidence to claims@shiprion.com. Appeals are reviewed by a senior claims adjuster and a final decision will be issued within 10 business days.",
+        text: "If your claim is denied and you believe this decision is incorrect, you may appeal within 14 days of the denial notice by submitting a written appeal with additional evidence to info@shiprion.com. Appeals are reviewed by a senior claims adjuster and a final decision will be issued within 10 business days.",
       },
     ],
   },
@@ -318,10 +318,10 @@ export default function InsurancePolicy() {
                   <Mail className="h-4 w-4" /> Contact Us
                 </Link>
                 <a
-                  href="mailto:claims@shiprion.com"
+                  href="mailto:info@shiprion.com"
                   className="text-sm text-olive-400 hover:text-olive-300 transition-colors"
                 >
-                  claims@shiprion.com
+                  info@shiprion.com
                 </a>
               </div>
             </div>

@@ -2090,11 +2090,11 @@ function Footer() {
               </div>
               <div className="space-y-2.5 text-sm text-gray-300">
                 <a
-                  href="mailto:support@shiprion.com"
+                  href="mailto:info@shiprion.com"
                   className="flex items-center gap-2 hover:text-white transition-colors"
                 >
                   <Mail className="h-3.5 w-3.5 text-olive-400 shrink-0" />{" "}
-                  support@shiprion.com
+                  info@shiprion.com
                 </a>
                 <a
                   href="tel:+14785001234"

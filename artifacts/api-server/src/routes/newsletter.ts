@@ -1,7 +1,13 @@
 import { Router, type IRouter } from "express";
-import { db, newsletterSubscriptionsTable } from "@workspace/db";
+import {
+  db,
+  newsletterSubscriptionsTable,
+  emailOutboxTable,
+} from "@workspace/db";
 import { newsletterBody } from "../lib/newsletter";
 import { persistentRateLimit } from "../lib/rate-limit";
+import { companyInboxEmail } from "../lib/company-inbox";
+import { dispatchQueuedEmails } from "../lib/outbox";
 
 const router: IRouter = Router();
 
@@ -18,10 +24,24 @@ router.post(
       });
       return;
     }
-    await db
-      .insert(newsletterSubscriptionsTable)
-      .values(parsed.data)
-      .onConflictDoNothing({ target: newsletterSubscriptionsTable.email });
+    const emailIds = await db.transaction(async (tx) => {
+      const [subscription] = await tx
+        .insert(newsletterSubscriptionsTable)
+        .values(parsed.data)
+        .onConflictDoNothing({ target: newsletterSubscriptionsTable.email })
+        .returning();
+      if (!subscription) return [];
+      const [notification] = await tx
+        .insert(emailOutboxTable)
+        .values(
+          companyInboxEmail("New newsletter signup", {
+            Email: subscription.email,
+          }),
+        )
+        .returning({ id: emailOutboxTable.id });
+      return [notification!.id];
+    });
+    await dispatchQueuedEmails(emailIds);
     res.status(200).json({ subscribed: true });
   },
 );

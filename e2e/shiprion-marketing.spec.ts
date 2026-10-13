@@ -27,8 +27,8 @@ test("all marketing routes consistently use Shiprion branding and contact detail
       "Shiprion",
     );
     await expect(
-      page.locator('.footer a[href="mailto:support@shiprion.com"]'),
-    ).toHaveText("support@shiprion.com");
+      page.locator('.footer a[href="mailto:info@shiprion.com"]'),
+    ).toHaveText("info@shiprion.com");
     await expect(
       page.locator('link[rel="icon"][href="/shiprion/brand-icon.svg"]'),
     ).toHaveCount(1);

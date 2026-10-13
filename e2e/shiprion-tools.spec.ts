@@ -105,6 +105,9 @@ test("original footer links are available on all marketing and shipping pages", 
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const footer = page.locator("footer");
+    await expect(
+      footer.getByRole("link", { name: "info@shiprion.com", exact: true }),
+    ).toHaveAttribute("href", "mailto:info@shiprion.com");
     for (const [name, href] of Object.entries(links))
       await expect(
         footer.getByRole("link", { name, exact: true }),
@@ -136,9 +139,11 @@ test("original footer links are available on all marketing and shipping pages", 
   await page.getByTestId("tab-register").click();
   await expect(page.getByTestId("form-register")).toBeVisible();
   await page.goto("/services");
-  const legacyAccount = page.getByTestId("navbar").locator('a[href="/login"]');
-  await expect(legacyAccount).toHaveCount(1);
-  await expect(legacyAccount).toHaveText("Login / Sign up");
+  const servicesAccount = page
+    .getByRole("navigation", { name: "Account navigation", exact: true })
+    .getByRole("link", { name: "Login / Sign up", exact: true });
+  await expect(servicesAccount).toHaveCount(1);
+  await expect(servicesAccount).toHaveAttribute("href", "/login");
 });
 
 test("signed-in customers and staff get their dashboard link instead of guest account links", async ({

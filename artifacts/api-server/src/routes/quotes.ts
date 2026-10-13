@@ -31,6 +31,8 @@ import {
   requireRoles,
 } from "../middleware/auth";
 import { getIO } from "../socket";
+import { companyInboxEmail } from "../lib/company-inbox";
+import { dispatchQueuedEmails } from "../lib/outbox";
 
 const router: IRouter = Router();
 const requireQuoteReader = requireRoles("admin", "operator", "customer");
@@ -185,17 +187,34 @@ router.post("/quotes", submitLimit, async (req, res): Promise<void> => {
         html: `<div style="font-family:sans-serif"><h2>Your quote request was received</h2><p>Create or verify your Shiprion account to follow and accept this quote.</p><p><a href="${escapeHtml(claimUrl)}">Claim ${escapeHtml(quote!.reference)}</a></p><p>This link expires in 24 hours.</p></div>`,
       });
     }
-    return quote!;
+    const [inboxEmail] = await tx
+      .insert(emailOutboxTable)
+      .values(
+        companyInboxEmail(`New quote request ${quote!.reference}`, {
+          Name: quote!.contactName,
+          Email: quote!.contactEmail,
+          Origin: quote!.origin,
+          Destination: quote!.destination,
+          Cargo: quote!.cargoType,
+          Weight: `${quote!.weightKg} kg`,
+          Phone: quote!.contactPhone ?? "",
+          Notes: quote!.notes ?? "",
+        }),
+      )
+      .returning({ id: emailOutboxTable.id });
+    return { quote: quote!, inboxEmailId: inboxEmail!.id };
   });
+  await dispatchQueuedEmails([result.inboxEmailId]);
   try {
-    getIO()
-      .to("staff")
-      .emit("quote:created", { id: result.id, reference: result.reference });
+    getIO().to("staff").emit("quote:created", {
+      id: result.quote.id,
+      reference: result.quote.reference,
+    });
   } catch {
     /* best effort */
   }
   res.status(201).json({
-    ...result,
+    ...result.quote,
     breakdown,
     ...(developmentClaimToken ? { devClaimToken: developmentClaimToken } : {}),
   });

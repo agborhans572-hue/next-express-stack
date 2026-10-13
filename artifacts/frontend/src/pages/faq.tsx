@@ -154,7 +154,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: "How can I contact customer support?",
-        a: "We offer multiple support channels: Live Chat (available 24/7 on your dashboard and our website), Email (support@shiprion.com — response within 4 hours), Phone (+1-478-500-1234 — available Mon–Sat, 6 AM – 10 PM EST), and our Contact Form on the website. Enterprise clients have access to a dedicated account manager and priority support line.",
+        a: "We offer multiple support channels: Live Chat (available 24/7 on your dashboard and our website), Email (info@shiprion.com — response within 4 hours), Phone (+1-478-500-1234 — available Mon–Sat, 6 AM – 10 PM EST), and our Contact Form on the website. Enterprise clients have access to a dedicated account manager and priority support line.",
       },
       {
         q: "Can I change or cancel a shipment after booking?",

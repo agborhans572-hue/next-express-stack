@@ -1,7 +1,10 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
+import { COMPANY_INBOX } from "./company-inbox";
 
-const FROM_EMAIL = process.env.FROM_EMAIL ?? "verify@shiprion.com";
+const FROM_EMAIL =
+  process.env.FROM_EMAIL?.replace(/^support@shiprion\.com$/i, COMPANY_INBOX) ??
+  COMPANY_INBOX;
 const FROM = `Shiprion <${FROM_EMAIL}>`;
 
 function createTransporter() {
@@ -10,12 +13,18 @@ function createTransporter() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
+  return nodemailer.createTransport(
+    {
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+      connectionTimeout: 5_000,
+      greetingTimeout: 5_000,
+      socketTimeout: 10_000,
+    },
+    { replyTo: COMPANY_INBOX },
+  );
 }
 
 export function isEmailConfigured(): boolean {
@@ -204,7 +213,7 @@ export async function sendContactConfirmationEmail(
       </p>
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(143,163,59,0.25);border-radius:12px;padding:20px;margin-bottom:24px;text-align:center">
         <p style="color:#9ca3af;font-size:13px;margin:0 0 6px 0">Need urgent help?</p>
-        <a href="mailto:support@shiprion.com" style="color:#8fa33b;font-size:14px;font-weight:600;text-decoration:none">support@shiprion.com</a>
+        <a href="mailto:info@shiprion.com" style="color:#8fa33b;font-size:14px;font-weight:600;text-decoration:none">info@shiprion.com</a>
       </div>
       <p style="color:#6b7280;font-size:11px;line-height:1.6;text-align:center">
         Please do not reply to this email. This is an automated confirmation.
@@ -275,7 +284,7 @@ export async function sendContactNotificationEmail(
   try {
     await transporter.sendMail({
       from: FROM,
-      to: "support@shiprion.com",
+      to: COMPANY_INBOX,
       subject: `Shiprion — New message from ${safeName}`,
       html,
     });
@@ -294,5 +303,10 @@ export async function sendRawEmail(
   html: string,
 ): Promise<void> {
   if (!isEmailConfigured()) throw new Error("SMTP is not configured");
-  await createTransporter().sendMail({ from: FROM, to, subject, html });
+  await createTransporter().sendMail({
+    from: FROM,
+    to: to.replace(/^support@shiprion\.com$/i, COMPANY_INBOX),
+    subject,
+    html,
+  });
 }

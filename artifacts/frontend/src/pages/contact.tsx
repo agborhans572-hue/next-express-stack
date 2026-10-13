@@ -92,8 +92,8 @@ export default function Contact() {
           }
           description="A shipment to plan. A question to ask. An idea to share. Our logistics team is here to help you take the next step."
         >
-          <a className="tool-link" href="mailto:support@shiprion.com">
-            support@shiprion.com
+          <a className="tool-link" href="mailto:info@shiprion.com">
+            info@shiprion.com
             <ArrowUpRight size={20} />
           </a>
         </ToolHero>
@@ -222,7 +222,7 @@ export default function Contact() {
               <h2>Here to help.</h2>
               <div className="tool-contact-item">
                 <small>Email / We reply within 24 hours</small>
-                <a href="mailto:support@shiprion.com">support@shiprion.com</a>
+                <a href="mailto:info@shiprion.com">info@shiprion.com</a>
               </div>
               <div className="tool-contact-item">
                 <small>Phone / Mon–Fri, 8 AM–8 PM ET</small>

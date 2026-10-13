@@ -5,6 +5,7 @@ import {
   chatMessagesTable,
   chatSessionsTable,
   db,
+  emailOutboxTable,
   notificationsTable,
   usersTable,
 } from "@workspace/db";
@@ -12,6 +13,8 @@ import { getIO } from "../socket";
 import { persistentRateLimit } from "../lib/rate-limit";
 import { hashToken, isTokenActive } from "../lib/security";
 import { z } from "zod";
+import { companyInboxEmail } from "../lib/company-inbox";
+import { dispatchQueuedEmails } from "../lib/outbox";
 
 const router: IRouter = Router();
 
@@ -210,6 +213,7 @@ router.post(
       return;
     }
 
+    const emailIds: number[] = [];
     const message = await db.transaction(async (tx) => {
       const [created] = await tx
         .insert(chatMessagesTable)
@@ -243,6 +247,17 @@ router.post(
             href: "/admin",
           })),
         );
+      const [notification] = await tx
+        .insert(emailOutboxTable)
+        .values(
+          companyInboxEmail(`Guest message / conversation ${sessionId}`, {
+            Name: session.guestName ?? "Guest",
+            Email: session.userEmail,
+            Message: content.trim(),
+          }),
+        )
+        .returning({ id: emailOutboxTable.id });
+      emailIds.push(notification!.id);
       return created!;
     });
 
@@ -254,6 +269,7 @@ router.post(
       // Socket.IO not yet initialized — non-fatal
     }
 
+    await dispatchQueuedEmails(emailIds);
     res.status(201).json(message);
   },
 );

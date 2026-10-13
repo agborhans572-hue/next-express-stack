@@ -37,7 +37,7 @@ const SECTIONS = [
       "You must be at least 18 years of age (or the legal age of majority in your jurisdiction) to create an account",
       "You agree to provide truthful, current, and complete information during registration and to update it as necessary",
       "You are responsible for all activity on your account, whether or not authorized by you",
-      "You must notify us immediately at security@shiprion.com if you suspect unauthorized access to your account",
+      "You must notify us immediately at info@shiprion.com if you suspect unauthorized access to your account",
       "We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent activity",
       "Corporate accounts may designate authorized users; the account holder remains liable for all authorized user activity",
     ],

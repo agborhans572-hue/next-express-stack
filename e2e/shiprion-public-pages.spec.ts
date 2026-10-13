@@ -32,6 +32,12 @@ for (const width of [390, 1500]) {
       await page.goto(path);
       await expect(page.locator(".tool-header")).toBeVisible();
       await expect(page.locator(".tool-footer")).toHaveCount(1);
+      await expect(
+        page.locator('.tool-footer a[href="mailto:info@shiprion.com"]'),
+      ).toHaveText("info@shiprion.com");
+      await expect(
+        page.locator('a[href="mailto:support@shiprion.com"]'),
+      ).toHaveCount(0);
       await expect(page.locator("h1").first()).toBeVisible();
       await expect(
         page.locator(".tool-footer a[href='/services']").first(),

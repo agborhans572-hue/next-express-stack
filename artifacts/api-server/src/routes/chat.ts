@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { companyInboxEmail } from "../lib/company-inbox";
+import { dispatchQueuedEmails } from "../lib/outbox";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   chatMessagesTable,
@@ -189,6 +191,7 @@ router.post(
       return;
     }
 
+    const emailIds: number[] = [];
     const result = await db.transaction(async (tx) => {
       const [message] = await tx
         .insert(chatMessagesTable)
@@ -245,9 +248,21 @@ router.post(
             })),
           );
       }
+      const [inboxEmail] = await tx
+        .insert(emailOutboxTable)
+        .values(
+          companyInboxEmail(`Chat message / conversation ${sessionId}`, {
+            Email: session.userEmail,
+            Sender: req.session.role!,
+            Message: content.trim(),
+          }),
+        )
+        .returning({ id: emailOutboxTable.id });
+      emailIds.push(inboxEmail!.id);
       return { message: message!, notification };
     });
     const message = result.message;
+    await dispatchQueuedEmails(emailIds);
 
     try {
       const io = getIO();

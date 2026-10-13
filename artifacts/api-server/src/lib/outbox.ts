@@ -121,6 +121,20 @@ export async function processOutboxMessage(
   };
 }
 
+/** Send newly committed notifications now, retaining failures for retry. */
+export async function dispatchQueuedEmails(ids: number[]): Promise<void> {
+  for (const id of ids) {
+    try {
+      await processOutboxMessage(id);
+    } catch (error) {
+      logger.error(
+        { outboxId: id, error },
+        "Queued email remains available for retry",
+      );
+    }
+  }
+}
+
 export async function processOutboxBatch(): Promise<OutboxBatchResult> {
   if (running) return { claimed: 0, sent: 0, failed: 0, skipped: true };
   running = true;

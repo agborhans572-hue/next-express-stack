@@ -62,6 +62,16 @@ Reference styles, fonts, animations, and document changes are scoped to replica 
 
 Contact and study forms use the existing `/api/contact` persistence and support
 email workflow. Study messages begin with `[Shiprion custom study enquiry]`.
+All company contact links, operational contact/chat/quote notifications, and new
+newsletter signup notifications use `info@shiprion.com`. Notifications are queued
+in the same database transaction as the submission and attempt SMTP delivery
+after commit; failures remain in the existing outbox retry workflow. Duplicate
+newsletter submissions create one subscription and one inbox notification.
+Email replies use the info inbox. Customer confirmations, account verification,
+recovery, and shipment emails retain their customer recipients.
+`company-inbox.integration.test.ts` verifies recipient routing, authenticated and
+guest chat, immediate delivery, duplicate suppression, transactional rollback,
+and SMTP failure persistence with a local database and mocked mail transport.
 Newsletter signup uses `/api/newsletter/subscriptions`; normalized addresses are
 stored uniquely, retries succeed, and failures retain the entered value. Apply
 `lib/db/migrations/0004_newsletter_subscriptions.sql` through the existing migration

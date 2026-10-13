@@ -323,10 +323,10 @@ export default function ShippingPolicy() {
                   <Mail className="h-4 w-4" /> Contact Us
                 </Link>
                 <a
-                  href="mailto:support@shiprion.com"
+                  href="mailto:info@shiprion.com"
                   className="text-sm text-olive-400 hover:text-olive-300 transition-colors"
                 >
-                  support@shiprion.com
+                  info@shiprion.com
                 </a>
               </div>
             </div>
