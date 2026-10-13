@@ -1,9 +1,9 @@
+import { dispatchQueuedEmails, queueEmail } from "../lib/outbox";
 import { Router, type IRouter } from "express";
 import { eq, and, or, isNull, count, desc } from "drizzle-orm";
 import {
   auditEventsTable,
   db,
-  emailOutboxTable,
   notificationsTable,
   pool,
   shipmentsTable,
@@ -186,6 +186,7 @@ router.post(
     }
 
     const trackingNumber = await generateUniqueTrackingNumber();
+    const emailIds: number[] = [];
     const shipment = await db.transaction(async (tx) => {
       const [created] = await tx
         .insert(shipmentsTable)
@@ -231,20 +232,28 @@ router.post(
         href: "/dashboard?section=shipments",
       });
       const trackingUrl = appUrl(`/track/${created!.trackingNumber}`);
-      await tx.insert(emailOutboxTable).values({
-        toEmail: customer.email,
-        subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
-        html: `<div style="font-family:sans-serif"><h2>Your shipment is ready to track</h2><p>${escapeHtml(created!.trackingNumber)} has been assigned to your account.</p><p><a href="${escapeHtml(trackingUrl)}">Track shipment</a></p></div>`,
-      });
+      await queueEmail(
+        tx,
+        {
+          toEmail: customer.email,
+          subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
+          html: `<div style="font-family:sans-serif"><h2>Your shipment is ready to track</h2><p>${escapeHtml(created!.trackingNumber)} has been assigned to your account.</p><p><a href="${escapeHtml(trackingUrl)}">Track shipment</a></p></div>`,
+        },
+        emailIds,
+      );
       if (
         recipientEmail &&
         recipientEmail.toLowerCase() !== customer.email.toLowerCase()
       ) {
-        await tx.insert(emailOutboxTable).values({
-          toEmail: recipientEmail,
-          subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
-          html: `<div style="font-family:sans-serif"><h2>A shipment is on its way</h2><p>Hello ${escapeHtml(recipientName)}, a shipment from ${escapeHtml(origin)} to ${escapeHtml(destination)} has been created.</p><p><a href="${escapeHtml(trackingUrl)}">Track shipment</a></p></div>`,
-        });
+        await queueEmail(
+          tx,
+          {
+            toEmail: recipientEmail,
+            subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
+            html: `<div style="font-family:sans-serif"><h2>A shipment is on its way</h2><p>Hello ${escapeHtml(recipientName)}, a shipment from ${escapeHtml(origin)} to ${escapeHtml(destination)} has been created.</p><p><a href="${escapeHtml(trackingUrl)}">Track shipment</a></p></div>`,
+          },
+          emailIds,
+        );
       }
       await tx.insert(auditEventsTable).values({
         actorId: req.session.userId,
@@ -259,6 +268,7 @@ router.post(
       });
       return created!;
     });
+    await dispatchQueuedEmails(emailIds);
 
     try {
       const io = getIO();
@@ -315,6 +325,7 @@ router.patch(
       });
       return;
     }
+    const emailIds: number[] = [];
     const shipment = await db.transaction(async (tx) => {
       const [updated] = await tx
         .update(shipmentsTable)
@@ -334,11 +345,15 @@ router.patch(
         message: `${updated.trackingNumber} has been assigned to your account.`,
         href: "/dashboard?section=shipments",
       });
-      await tx.insert(emailOutboxTable).values({
-        toEmail: customer.email,
-        subject: `Shiprion - ${updated.trackingNumber} assigned`,
-        html: `<div style="font-family:sans-serif"><h2>Shipment assigned</h2><p>${escapeHtml(updated.trackingNumber)} is now available in your account.</p></div>`,
-      });
+      await queueEmail(
+        tx,
+        {
+          toEmail: customer.email,
+          subject: `Shiprion - ${updated.trackingNumber} assigned`,
+          html: `<div style="font-family:sans-serif"><h2>Shipment assigned</h2><p>${escapeHtml(updated.trackingNumber)} is now available in your account.</p></div>`,
+        },
+        emailIds,
+      );
       await tx.insert(auditEventsTable).values({
         actorId: req.session.userId,
         action: "shipment.customer_assigned",
@@ -348,6 +363,7 @@ router.patch(
       });
       return updated;
     });
+    await dispatchQueuedEmails(emailIds);
     if (!shipment) {
       res.status(404).json({
         code: "NOT_FOUND",
@@ -577,6 +593,7 @@ router.patch(
       }
     }
 
+    const emailIds: number[] = [];
     let transactionResult;
     try {
       transactionResult = await db.transaction(async (tx) => {
@@ -623,11 +640,15 @@ router.patch(
               .from(usersTable)
               .where(eq(usersTable.id, ownerId));
             if (owner)
-              await tx.insert(emailOutboxTable).values({
-                toEmail: owner.email,
-                subject: `Shiprion - ${updated!.trackingNumber} status update`,
-                html: `<div style="font-family:sans-serif"><h2>Shipment status updated</h2><p>${escapeHtml(updated!.trackingNumber)} is now ${escapeHtml(updated!.status.replaceAll("_", " "))}.</p><p><a href="${escapeHtml(appUrl(`/track/${updated!.trackingNumber}`))}">View tracking</a></p></div>`,
-              });
+              await queueEmail(
+                tx,
+                {
+                  toEmail: owner.email,
+                  subject: `Shiprion - ${updated!.trackingNumber} status update`,
+                  html: `<div style="font-family:sans-serif"><h2>Shipment status updated</h2><p>${escapeHtml(updated!.trackingNumber)} is now ${escapeHtml(updated!.status.replaceAll("_", " "))}.</p><p><a href="${escapeHtml(appUrl(`/track/${updated!.trackingNumber}`))}">View tracking</a></p></div>`,
+                },
+                emailIds,
+              );
           }
           await tx.insert(auditEventsTable).values({
             actorId: req.session.userId,
@@ -659,6 +680,7 @@ router.patch(
       throw error;
     }
     const updated = transactionResult.updated;
+    await dispatchQueuedEmails(emailIds);
 
     try {
       const payload: ShipmentRealtimePayload = {

@@ -69,6 +69,11 @@ after commit; failures remain in the existing outbox retry workflow. Duplicate
 newsletter submissions create one subscription and one inbox notification.
 Email replies use the info inbox. Customer confirmations, account verification,
 recovery, and shipment emails retain their customer recipients.
+Quote claim/offer/acceptance/conversion emails, staff chat replies, and shipment
+creation/assignment/status/tracking/delivery emails also attempt delivery after
+their database transaction commits. The existing outbox keeps failed messages for
+retry. Staff data refreshes in the background every 15 seconds and on focus or
+visibility changes, preserving active panel fields during the refresh.
 `company-inbox.integration.test.ts` verifies recipient routing, authenticated and
 guest chat, immediate delivery, duplicate suppression, transactional rollback,
 and SMTP failure persistence with a local database and mocked mail transport.

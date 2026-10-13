@@ -221,12 +221,17 @@ router.post(
               href: "/dashboard?section=support",
             })
             .returning();
-        if (session.userEmail.includes("@"))
-          await tx.insert(emailOutboxTable).values({
-            toEmail: session.userEmail,
-            subject: "Shiprion - New support reply",
-            html: `<div style="font-family:sans-serif"><h2>New support reply</h2><p>Shiprion Support replied to your conversation. Sign in to view the message.</p></div>`,
-          });
+        if (session.userEmail.includes("@")) {
+          const [replyEmail] = await tx
+            .insert(emailOutboxTable)
+            .values({
+              toEmail: session.userEmail,
+              subject: "Shiprion - New support reply",
+              html: `<div style="font-family:sans-serif"><h2>New support reply</h2><p>Shiprion Support replied to your conversation. Sign in to view the message.</p></div>`,
+            })
+            .returning({ id: emailOutboxTable.id });
+          emailIds.push(replyEmail!.id);
+        }
       } else {
         const staff = await tx
           .select({ id: usersTable.id })

@@ -135,6 +135,18 @@ export async function dispatchQueuedEmails(ids: number[]): Promise<void> {
   }
 }
 
+export async function queueEmail(
+  transaction: Pick<typeof db, "insert">,
+  email: typeof emailOutboxTable.$inferInsert,
+  committedIds: number[],
+): Promise<void> {
+  const [message] = await transaction
+    .insert(emailOutboxTable)
+    .values(email)
+    .returning({ id: emailOutboxTable.id });
+  committedIds.push(message!.id);
+}
+
 export async function processOutboxBatch(): Promise<OutboxBatchResult> {
   if (running) return { claimed: 0, sent: 0, failed: 0, skipped: true };
   running = true;

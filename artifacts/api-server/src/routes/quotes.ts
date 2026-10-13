@@ -134,6 +134,7 @@ router.post("/quotes", submitLimit, async (req, res): Promise<void> => {
       customerId = user.id;
   }
   let developmentClaimToken: string | undefined;
+  const emailIds: number[] = [];
   const result = await db.transaction(async (tx) => {
     const [quote] = await tx
       .insert(quotesTable)
@@ -181,11 +182,15 @@ router.post("/quotes", submitLimit, async (req, res): Promise<void> => {
       const claimUrl = appUrl(
         `/claim-quote?token=${encodeURIComponent(token)}`,
       );
-      await tx.insert(emailOutboxTable).values({
-        toEmail: quote!.contactEmail,
-        subject: `Shiprion — Claim quote ${quote!.reference}`,
-        html: `<div style="font-family:sans-serif"><h2>Your quote request was received</h2><p>Create or verify your Shiprion account to follow and accept this quote.</p><p><a href="${escapeHtml(claimUrl)}">Claim ${escapeHtml(quote!.reference)}</a></p><p>This link expires in 24 hours.</p></div>`,
-      });
+      const [claimEmail] = await tx
+        .insert(emailOutboxTable)
+        .values({
+          toEmail: quote!.contactEmail,
+          subject: `Shiprion — Claim quote ${quote!.reference}`,
+          html: `<div style="font-family:sans-serif"><h2>Your quote request was received</h2><p>Create or verify your Shiprion account to follow and accept this quote.</p><p><a href="${escapeHtml(claimUrl)}">Claim ${escapeHtml(quote!.reference)}</a></p><p>This link expires in 24 hours.</p></div>`,
+        })
+        .returning({ id: emailOutboxTable.id });
+      emailIds.push(claimEmail!.id);
     }
     const [inboxEmail] = await tx
       .insert(emailOutboxTable)
@@ -204,7 +209,7 @@ router.post("/quotes", submitLimit, async (req, res): Promise<void> => {
       .returning({ id: emailOutboxTable.id });
     return { quote: quote!, inboxEmailId: inboxEmail!.id };
   });
-  await dispatchQueuedEmails([result.inboxEmailId]);
+  await dispatchQueuedEmails([result.inboxEmailId, ...emailIds]);
   try {
     getIO().to("staff").emit("quote:created", {
       id: result.quote.id,
@@ -377,6 +382,7 @@ router.post(
     const validUntil = new Date(
       Date.now() + parsed.data.validDays * 86_400_000,
     );
+    const emailIds: number[] = [];
     let quote;
     try {
       quote = await db.transaction(async (tx) => {
@@ -420,11 +426,15 @@ router.post(
             message,
             href: "/dashboard?section=quotes",
           });
-        await tx.insert(emailOutboxTable).values({
-          toEmail: updated.contactEmail,
-          subject: `Shiprion - Quote ${updated.reference} is ready`,
-          html: `<div style="font-family:sans-serif"><h2>Your Shiprion quote is ready</h2><p>${escapeHtml(message)}</p><p><a href="${escapeHtml(appUrl("/dashboard?section=quotes"))}">Review quote</a></p><p>Valid until ${validUntil.toLocaleDateString("en-US")}.</p></div>`,
-        });
+        const [queuedEmail] = await tx
+          .insert(emailOutboxTable)
+          .values({
+            toEmail: updated.contactEmail,
+            subject: `Shiprion - Quote ${updated.reference} is ready`,
+            html: `<div style="font-family:sans-serif"><h2>Your Shiprion quote is ready</h2><p>${escapeHtml(message)}</p><p><a href="${escapeHtml(appUrl("/dashboard?section=quotes"))}">Review quote</a></p><p>Valid until ${validUntil.toLocaleDateString("en-US")}.</p></div>`,
+          })
+          .returning({ id: emailOutboxTable.id });
+        emailIds.push(queuedEmail!.id);
         await tx.insert(auditEventsTable).values({
           actorId: req.session.userId,
           action: "quote.offered",
@@ -448,6 +458,7 @@ router.post(
       }
       throw error;
     }
+    await dispatchQueuedEmails(emailIds);
     try {
       if (quote.customerId)
         getIO().to(`user:${quote.customerId}`).emit("notification:new", {
@@ -474,6 +485,7 @@ router.post(
       return;
     }
     const id = Number(req.params.id);
+    const emailIds: number[] = [];
     const quote = await db.transaction(async (tx) => {
       const [accepted] = await tx
         .update(quotesTable)
@@ -499,11 +511,15 @@ router.post(
         message: `${accepted.reference} has been accepted and is ready for shipment scheduling.`,
         href: "/dashboard?section=quotes",
       });
-      await tx.insert(emailOutboxTable).values({
-        toEmail: accepted.contactEmail,
-        subject: `Shiprion - Quote ${accepted.reference} accepted`,
-        html: `<div style="font-family:sans-serif"><h2>Quote accepted</h2><p>${escapeHtml(accepted.reference)} has been accepted. Our operations team will prepare the shipment.</p></div>`,
-      });
+      const [queuedEmail] = await tx
+        .insert(emailOutboxTable)
+        .values({
+          toEmail: accepted.contactEmail,
+          subject: `Shiprion - Quote ${accepted.reference} accepted`,
+          html: `<div style="font-family:sans-serif"><h2>Quote accepted</h2><p>${escapeHtml(accepted.reference)} has been accepted. Our operations team will prepare the shipment.</p></div>`,
+        })
+        .returning({ id: emailOutboxTable.id });
+      emailIds.push(queuedEmail!.id);
       const staff = await tx
         .select({ id: usersTable.id })
         .from(usersTable)
@@ -540,6 +556,7 @@ router.post(
       });
       return;
     }
+    await dispatchQueuedEmails(emailIds);
     try {
       getIO()
         .to("staff")
@@ -621,6 +638,7 @@ router.post(
       });
       return;
     }
+    const emailIds: number[] = [];
     let result;
     try {
       result = await db.transaction(async (tx) => {
@@ -691,11 +709,15 @@ router.post(
           message: `${created!.trackingNumber} was created from quote ${existing.reference}.`,
           href: "/dashboard?section=shipments",
         });
-        await tx.insert(emailOutboxTable).values({
-          toEmail: customer.email,
-          subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
-          html: `<div style="font-family:sans-serif"><h2>Your shipment is ready to track</h2><p>Tracking number: <strong>${escapeHtml(created!.trackingNumber)}</strong></p><p><a href="${escapeHtml(appUrl(`/track/${created!.trackingNumber}`))}">Track shipment</a></p></div>`,
-        });
+        const [queuedEmail] = await tx
+          .insert(emailOutboxTable)
+          .values({
+            toEmail: customer.email,
+            subject: `Shiprion - Shipment ${created!.trackingNumber} created`,
+            html: `<div style="font-family:sans-serif"><h2>Your shipment is ready to track</h2><p>Tracking number: <strong>${escapeHtml(created!.trackingNumber)}</strong></p><p><a href="${escapeHtml(appUrl(`/track/${created!.trackingNumber}`))}">Track shipment</a></p></div>`,
+          })
+          .returning({ id: emailOutboxTable.id });
+        emailIds.push(queuedEmail!.id);
         await tx.insert(auditEventsTable).values({
           actorId: req.session.userId,
           action: "quote.converted",
@@ -726,6 +748,7 @@ router.post(
       throw error;
     }
     const shipment = result.shipment;
+    await dispatchQueuedEmails(emailIds);
     try {
       const io = getIO();
       io.to(`user:${result.customerId}`).emit("shipmentUpdated", {

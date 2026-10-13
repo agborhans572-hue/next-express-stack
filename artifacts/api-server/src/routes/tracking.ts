@@ -1,9 +1,9 @@
+import { dispatchQueuedEmails, queueEmail } from "../lib/outbox";
 import { Router, type IRouter } from "express";
 import { eq, asc } from "drizzle-orm";
 import {
   auditEventsTable,
   db,
-  emailOutboxTable,
   notificationsTable,
   SHIPMENT_STATUSES,
   shipmentsTable,
@@ -133,6 +133,7 @@ router.post(
       lng = geo.lng;
     }
 
+    const emailIds: number[] = [];
     let result;
     try {
       result = await db.transaction(async (tx) => {
@@ -182,11 +183,15 @@ router.post(
               .from(usersTable)
               .where(eq(usersTable.id, ownerId));
             if (owner)
-              await tx.insert(emailOutboxTable).values({
-                toEmail: owner.email,
-                subject: `Shiprion - ${locked.trackingNumber} status update`,
-                html: `<div style="font-family:sans-serif"><h2>Shipment status updated</h2><p>${escapeHtml(locked.trackingNumber)} is now ${escapeHtml(body.data.status.replaceAll("_", " "))}.</p><p><a href="${escapeHtml(appUrl(`/track/${locked.trackingNumber}`))}">View tracking</a></p></div>`,
-              });
+              await queueEmail(
+                tx,
+                {
+                  toEmail: owner.email,
+                  subject: `Shiprion - ${locked.trackingNumber} status update`,
+                  html: `<div style="font-family:sans-serif"><h2>Shipment status updated</h2><p>${escapeHtml(locked.trackingNumber)} is now ${escapeHtml(body.data.status.replaceAll("_", " "))}.</p><p><a href="${escapeHtml(appUrl(`/track/${locked.trackingNumber}`))}">View tracking</a></p></div>`,
+                },
+                emailIds,
+              );
           }
           await tx.insert(auditEventsTable).values({
             actorId: req.session.userId,
@@ -218,6 +223,7 @@ router.post(
       throw error;
     }
 
+    await dispatchQueuedEmails(emailIds);
     try {
       const payload: ShipmentRealtimePayload = {
         shipmentId: shipment.id,

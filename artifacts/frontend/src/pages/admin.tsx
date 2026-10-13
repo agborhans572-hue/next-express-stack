@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
   BarChart3,
@@ -102,9 +102,11 @@ export default function AdminPage() {
   const isOperations = user?.role === "admin" || user?.role === "operator";
   const isSupport = user?.role === "admin" || user?.role === "support";
 
-  async function refresh() {
-    if (!user || user.role === "customer") return;
-    setLoading(true);
+  const refreshing = useRef(false);
+  async function refresh(background = false) {
+    if (!user || user.role === "customer" || refreshing.current) return;
+    refreshing.current = true;
+    if (!background) setLoading(true);
     try {
       const jobs: Promise<void>[] = [];
       if (isOperations || user.role === "support")
@@ -149,7 +151,8 @@ export default function AdminPage() {
           : "Could not load the operations console.",
       );
     } finally {
-      setLoading(false);
+      refreshing.current = false;
+      if (!background) setLoading(false);
     }
   }
   useEffect(() => {
@@ -158,7 +161,18 @@ export default function AdminPage() {
   }, [user, isLoading]);
   useEffect(() => {
     void refresh();
-  }, [user?.id]);
+    const refreshVisible = () => {
+      if (document.visibilityState === "visible") void refresh(true);
+    };
+    const timer = window.setInterval(refreshVisible, 15_000);
+    window.addEventListener("focus", refreshVisible);
+    document.addEventListener("visibilitychange", refreshVisible);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshVisible);
+      document.removeEventListener("visibilitychange", refreshVisible);
+    };
+  }, [user?.id, user?.role]);
   async function logout() {
     await apiFetch<void>("/auth/logout", { method: "POST" });
     refetch();

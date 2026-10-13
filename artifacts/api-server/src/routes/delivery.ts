@@ -1,10 +1,10 @@
+import { dispatchQueuedEmails, queueEmail } from "../lib/outbox";
 import { Router, type IRouter } from "express";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
   auditEventsTable,
   db,
-  emailOutboxTable,
   notificationsTable,
   proofDeliveriesTable,
   shipmentsTable,
@@ -169,6 +169,7 @@ router.post(
           .from(usersTable)
           .where(eq(usersTable.id, shipment.customerId))
       : [];
+    const emailIds: number[] = [];
     let proof;
     try {
       proof = await db.transaction(async (tx) => {
@@ -212,11 +213,15 @@ router.post(
             message: `${shipment.trackingNumber} was delivered successfully.`,
             href: "/dashboard?section=shipments",
           });
-          await tx.insert(emailOutboxTable).values({
-            toEmail: customer.email,
-            subject: `Shiprion — ${shipment.trackingNumber} delivered`,
-            html: `<div style="font-family:sans-serif"><h2>Shipment delivered</h2><p>${escapeHtml(shipment.trackingNumber)} was delivered to ${escapeHtml(parsed.data.recipientName)}.</p><p><a href="${escapeHtml(appUrl("/dashboard?section=shipments"))}">View proof of delivery</a></p></div>`,
-          });
+          await queueEmail(
+            tx,
+            {
+              toEmail: customer.email,
+              subject: `Shiprion — ${shipment.trackingNumber} delivered`,
+              html: `<div style="font-family:sans-serif"><h2>Shipment delivered</h2><p>${escapeHtml(shipment.trackingNumber)} was delivered to ${escapeHtml(parsed.data.recipientName)}.</p><p><a href="${escapeHtml(appUrl("/dashboard?section=shipments"))}">View proof of delivery</a></p></div>`,
+            },
+            emailIds,
+          );
         }
         await tx.insert(auditEventsTable).values({
           actorId: req.session.userId,
@@ -242,6 +247,7 @@ router.post(
       }
       throw error;
     }
+    await dispatchQueuedEmails(emailIds);
     try {
       const io = getIO();
       const payload: ShipmentRealtimePayload = {
