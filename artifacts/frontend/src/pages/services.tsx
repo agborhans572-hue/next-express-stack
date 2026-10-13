@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { FadeIn, StaggerList, StaggerItem } from "@/components/fade-in";
-import { useLocation, Link } from "wouter";
-import { useEliteAnimations } from "@/hooks/useEliteAnimations";
 import { Helmet } from "react-helmet-async";
-import { PublicNavbar } from "@/components/navbar";
+import { Link } from "wouter";
+import ToolLayout, { ToolHero } from "@/shiprion/ToolLayout";
 import {
   Zap,
   Globe,
@@ -12,17 +9,15 @@ import {
   CheckCircle2,
   Shield,
   Clock,
-  ArrowRight,
+  ArrowUpRight,
   BarChart3,
   Headphones,
   RefreshCw,
   Plane,
   Ship,
   Package,
-  ChevronDown,
-  ChevronUp,
-  MapPin,
-  Star,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 const SERVICES = [
@@ -229,12 +224,9 @@ const ROUTES = [
 ];
 
 export default function Services() {
-  const [, setLocation] = useLocation();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  useEliteAnimations();
-
   return (
-    <div className="min-h-[100dvh] bg-white">
+    <ToolLayout page="services">
       <Helmet>
         <title>Shipping Services | Air, Road & Ocean Freight — Shiprion</title>
         <meta
@@ -309,391 +301,173 @@ export default function Services() {
           })}
         </script>
       </Helmet>
-      <PublicNavbar />
-
-      <section className="relative bg-white text-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-olive-500/8 rounded-full blur-[200px] animate-orb pointer-events-none" />
-        <img
-          src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600&h=600&fit=crop&fm=webp"
-          alt="Logistics warehouse"
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 w-full h-full object-cover opacity-10"
-        />
-        <div className="relative max-w-7xl mx-auto px-6 py-32 text-center">
-          <FadeIn direction="up">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-4">
-              What We Offer
-            </p>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl font-extrabold mb-5">
-              Every shipping solution, <br className="hidden sm:block" />
-              <span className="text-gradient-olive">under one roof.</span>
-            </h1>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.2}>
-            <p className="text-gray-500 max-w-xl mx-auto text-lg leading-relaxed">
-              From overnight parcels to 40-foot containers — choose the service
-              that fits your cargo, budget, and deadline.
-            </p>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.3}>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/calculator"
-                className="flex items-center justify-center gap-2 bg-olive-500 hover:bg-olive-400 text-white font-bold px-8 py-3.5 rounded-xl transition-colors text-sm glow-olive"
-              >
-                Get Instant Quote <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="flex items-center justify-center gap-2 border border-gray-300 text-gray-900 font-bold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-              >
-                Talk to Sales
-              </Link>
-            </div>
-          </FadeIn>
+      <ToolHero
+        label="Our services"
+        title={
+          <>
+            Every shipping solution.
+            <br />
+            <em>Under one roof.</em>
+          </>
+        }
+        description="From overnight parcels to 40-foot containers — choose the service that fits your cargo, budget, and deadline."
+      >
+        <Link href="/calculator" className="services-action">
+          Get a quote <ArrowUpRight />
+        </Link>
+      </ToolHero>
+      <section
+        className="services-section tool-shell"
+        aria-labelledby="services-heading"
+      >
+        <div className="services-section-heading" data-reveal>
+          <p className="services-label">01 / Shipping solutions</p>
+          <h2 id="services-heading">Choose the right service.</h2>
+        </div>
+        <div className="services-grid">
+          {SERVICES.map(
+            (
+              {
+                id,
+                icon: Icon,
+                name,
+                tagline,
+                description,
+                delivery,
+                badge,
+                features,
+              },
+              index,
+            ) => (
+              <article className="services-card" key={id} data-reveal>
+                <div className="services-card-top">
+                  <Icon size={36} strokeWidth={1} />
+                  <span>
+                    0{index + 1} / {badge}
+                  </span>
+                </div>
+                <h3>{name}</h3>
+                <p className="services-tagline">{tagline}</p>
+                <p>{description}</p>
+                <p className="services-delivery">
+                  <Clock size={18} />
+                  {delivery}
+                </p>
+                <ul>
+                  {features.map((feature) => (
+                    <li key={feature}>
+                      <CheckCircle2 size={16} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/calculator" className="services-action">
+                  Get a quote <ArrowUpRight />
+                </Link>
+              </article>
+            ),
+          )}
         </div>
       </section>
-
-      <section className="bg-gray-50 border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { v: "180+", l: "Countries" },
-            { v: "2.5M", l: "Deliveries" },
-            { v: "98.7%", l: "On-Time Rate" },
-            { v: "24/7", l: "Support" },
-          ].map(({ v, l }) => (
-            <div key={l}>
-              <p className="text-2xl font-extrabold text-gray-900">{v}</p>
-              <p className="text-gray-500 text-sm">{l}</p>
+      <section className="services-band">
+        <div className="tool-shell services-section">
+          <div className="services-section-heading" data-reveal>
+            <p className="services-label">02 / Every shipment</p>
+            <h2>Handled with care.</h2>
+          </div>
+          <div className="services-benefits">
+            {INCLUDED.map(({ icon: Icon, title, desc }) => (
+              <div key={title} data-reveal>
+                <Icon size={36} strokeWidth={1} />
+                <h3>{title}</h3>
+                <p>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="services-section tool-shell">
+        <div className="services-section-heading" data-reveal>
+          <p className="services-label">03 / How it works</p>
+          <h2>From quote to your door.</h2>
+        </div>
+        <div className="services-steps">
+          {STEPS.map(({ n, title, desc }) => (
+            <div key={n} data-reveal>
+              <span>{n}</span>
+              <h3>{title}</h3>
+              <p>{desc}</p>
             </div>
           ))}
         </div>
       </section>
-
-      <section className="py-24 px-6 bg-white relative overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[180px] pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <FadeIn direction="up" className="text-center mb-14">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              Our Services
-            </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-              Choose the right service
-            </h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-              Every plan includes real-time tracking, door-to-door coverage, and
-              full insurance — no hidden fees.
-            </p>
-          </FadeIn>
-          <StaggerList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map((service) => {
-              const Icon = service.icon;
-              return (
-                <StaggerItem key={service.id}>
-                  <motion.div
-                    whileHover={{ y: -4, borderColor: "rgba(156,167,99,0.3)" }}
-                    transition={{ type: "spring", stiffness: 280, damping: 22 }}
-                    className="gsap-tilt-card bg-white backdrop-blur-xl rounded-2xl border border-gray-200 overflow-hidden h-full"
-                  >
-                    <div className="px-6 py-7 border-b border-gray-200">
-                      <div className="inline-flex p-3 rounded-xl bg-olive-500/10 border border-olive-500/20 mb-4">
-                        <Icon className="h-6 w-6 text-olive-400" />
-                      </div>
-                      <div className="flex items-center justify-between mb-1">
-                        <h2 className="text-lg font-bold text-gray-900">
-                          {service.name}
-                        </h2>
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-olive-500/15 text-olive-400 border border-olive-500/20">
-                          {service.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 italic">
-                        {service.tagline}
-                      </p>
-                    </div>
-                    <div className="px-6 py-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-semibold text-gray-600">
-                          {service.delivery}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 leading-relaxed mb-5">
-                        {service.description}
-                      </p>
-                      <ul className="space-y-2 mb-6">
-                        {service.features.map((feat) => (
-                          <li
-                            key={feat}
-                            className="flex items-start gap-2.5 text-sm text-gray-500"
-                          >
-                            <CheckCircle2 className="h-4 w-4 text-olive-400 shrink-0 mt-0.5" />
-                            {feat}
-                          </li>
-                        ))}
-                      </ul>
-                      <Link
-                        href="/calculator"
-                        className="w-full flex items-center justify-center gap-1.5 bg-olive-500 hover:bg-olive-400 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors glow-olive-sm"
-                      >
-                        Get a Quote <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </motion.div>
-                </StaggerItem>
-              );
-            })}
-          </StaggerList>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <FadeIn direction="up" className="text-center mb-14">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              Simple Process
-            </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-              How it works
-            </h2>
-            <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-              Book your shipment in minutes and we handle everything else.
-            </p>
-          </FadeIn>
-          <StaggerList className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {STEPS.map((step, i) => (
-              <StaggerItem key={step.n}>
-                <div className="relative text-center">
-                  {i < STEPS.length - 1 && (
-                    <div className="hidden lg:block absolute top-8 left-[calc(50%+2.5rem)] right-0 h-px bg-gray-200" />
-                  )}
-                  <div className="w-16 h-16 bg-olive-500 text-white rounded-2xl flex items-center justify-center text-xl font-extrabold mx-auto mb-4 shadow-lg glow-olive-sm">
-                    {step.n}
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    {step.desc}
-                  </p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <FadeIn direction="up" className="text-center mb-12">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              Standard Inclusions
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              Everything included — no surprises
-            </h2>
-            <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-              All services come with these features as standard.
-            </p>
-          </FadeIn>
-          <StaggerList className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {INCLUDED.map(({ icon: Icon, title, desc }) => (
-              <StaggerItem key={title}>
-                <div className="gsap-blur-pop flex items-start gap-4 p-5 rounded-2xl bg-white border border-gray-200 hover:border-olive-500/20 transition-all">
-                  <div className="w-10 h-10 bg-olive-500/10 border border-olive-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5 text-olive-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-900 mb-1">
-                      {title}
-                    </h3>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {desc}
-                    </p>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <FadeIn direction="up" className="text-center mb-12">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              Trade Lanes
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              Popular routes
-            </h2>
-            <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-              We operate high-frequency lanes across the Americas, Europe, and
-              the Middle East.
-            </p>
-          </FadeIn>
-          <StaggerList className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ROUTES.map((route) => (
-              <StaggerItem key={`${route.from}-${route.to}`}>
-                <motion.div
-                  whileHover={{ borderColor: "rgba(156,167,99,0.3)" }}
-                  className="flex items-center gap-4 p-5 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 transition-all group"
-                >
-                  <div className="w-10 h-10 bg-olive-500/10 border border-olive-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <MapPin className="h-5 w-5 text-olive-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">
-                      {route.from} → {route.to}
-                    </p>
-                    <p className="text-xs text-gray-500">{route.service}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-olive-400">
-                      {route.time}
-                    </p>
-                  </div>
-                </motion.div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-white border-t border-gray-200 relative overflow-hidden">
-        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-olive-500/5 rounded-full blur-[160px] pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <FadeIn direction="up" className="text-center mb-12">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              Client Stories
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              What our clients say
-            </h2>
-          </FadeIn>
-          <StaggerList className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                quote:
-                  "Shiprion's Air Freight team cleared our pharmaceutical cargo in 3 hours. Absolutely critical delivery — they delivered.",
-                name: "Dr. Kwame Asante",
-                role: "Supply Chain Director, MedPlus Americas",
-              },
-              {
-                quote:
-                  "We moved our entire e-commerce fulfillment to Shiprion. Order-to-door in 2 days, consistently. Game changer.",
-                name: "Fatima Al-Hassan",
-                role: "Founder, Silk & Thread Miami",
-              },
-              {
-                quote:
-                  "Their FCL rates to Rotterdam beat every other quote we received. The vessel tracking dashboard is excellent.",
-                name: "Pierre Dubois",
-                role: "Logistics Manager, CocoCo Exports",
-              },
-            ].map(({ quote, name, role }) => (
-              <StaggerItem key={name}>
-                <div className="bg-white backdrop-blur-xl border border-gray-200 rounded-2xl p-6 h-full">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 fill-olive-500 text-olive-500"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">
-                    "{quote}"
-                  </p>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">{name}</p>
-                    <p className="text-gray-500 text-xs">{role}</p>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-3xl mx-auto">
-          <FadeIn direction="up" className="text-center mb-12">
-            <p className="text-olive-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-              FAQ
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              Frequently asked questions
-            </h2>
-          </FadeIn>
-          <div className="space-y-3">
-            {FAQS.map((faq, i) => (
-              <FadeIn key={i} direction="up" delay={i * 0.04}>
-                <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white">
-                  <button
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-white transition-colors"
-                  >
-                    <span className="text-sm font-bold text-gray-900 pr-4">
-                      {faq.q}
-                    </span>
-                    {openFaq === i ? (
-                      <ChevronUp className="h-4 w-4 text-olive-400 shrink-0" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
-                    )}
-                  </button>
-                  {openFaq === i && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="px-6 pb-5 text-sm text-gray-500 leading-relaxed border-t border-gray-200 pt-4"
-                    >
-                      {faq.a}
-                    </motion.div>
-                  )}
-                </div>
-              </FadeIn>
+      <section className="services-band">
+        <div className="services-section tool-shell">
+          <div className="services-section-heading" data-reveal>
+            <p className="services-label">04 / Global connections</p>
+            <h2>Popular shipping routes.</h2>
+          </div>
+          <div className="services-routes">
+            {ROUTES.map(({ from, to, service, time }) => (
+              <div key={from} data-reveal>
+                <h3>
+                  {from} <ArrowUpRight /> {to}
+                </h3>
+                <p>
+                  {service}
+                  <span>{time}</span>
+                </p>
+              </div>
             ))}
           </div>
         </div>
       </section>
-
-      <section className="py-24 px-6 bg-white border-t border-gray-200 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-olive-500/8 rounded-full blur-[180px] pointer-events-none" />
-        <FadeIn direction="up" className="max-w-2xl mx-auto relative z-10">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
-            Ready to ship smarter?
-          </h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
+      <section className="services-section tool-shell">
+        <div className="services-section-heading" data-reveal>
+          <p className="services-label">05 / Your questions</p>
+          <h2>Good to know.</h2>
+        </div>
+        <div className="services-faq">
+          {FAQS.map(({ q, a }, i) => (
+            <div key={q}>
+              <h3>
+                <button
+                  aria-expanded={openFaq === i}
+                  aria-controls={`service-answer-${i}`}
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  {q}
+                  {openFaq === i ? <Minus /> : <Plus />}
+                </button>
+              </h3>
+              <div id={`service-answer-${i}`} hidden={openFaq !== i}>
+                <p>{a}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="services-cta">
+        <div className="tool-shell" data-reveal>
+          <p className="services-label">Let's get moving</p>
+          <h2>Ready to ship smarter?</h2>
+          <p>
             Create your free account and send your first shipment today. No
             commitment required.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/calculator"
-              className="flex items-center justify-center gap-2 bg-olive-500 hover:bg-olive-400 text-white font-bold px-8 py-3.5 rounded-xl transition-colors text-sm glow-olive"
-            >
-              Get Instant Quote <ArrowRight className="h-4 w-4" />
+          <div>
+            <Link href="/calculator" className="services-action">
+              Get instant quote <ArrowUpRight />
             </Link>
             <Link
               href="/contact"
-              className="flex items-center justify-center gap-2 border border-gray-300 text-gray-900 font-bold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+              className="services-action services-action-light"
             >
-              Contact Sales
+              Contact sales <ArrowUpRight />
             </Link>
           </div>
-        </FadeIn>
+        </div>
       </section>
-
-      <footer className="bg-white border-t border-gray-200 text-gray-600 py-8 px-6 text-center text-xs">
-        <p>
-          © {new Date().getFullYear()} Shiprion Logistics. All rights reserved.
-        </p>
-      </footer>
-    </div>
+    </ToolLayout>
   );
 }

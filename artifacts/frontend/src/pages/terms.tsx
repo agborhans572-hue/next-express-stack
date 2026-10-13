@@ -1,6 +1,5 @@
 import { Helmet } from "react-helmet-async";
 import { FadeIn } from "@/components/fade-in";
-import { PublicNavbar } from "@/components/navbar";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -199,9 +198,7 @@ export default function Terms() {
       <div className="fixed top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-olive-500/[0.04] blur-[120px] pointer-events-none animate-orb" />
       <div className="fixed bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-olive-500/[0.03] blur-[100px] pointer-events-none animate-orb-alt" />
 
-      <PublicNavbar />
-
-      <main className="relative z-[1] pt-28 pb-20 px-4 sm:px-6">
+      <div className="relative z-[1] pt-28 pb-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <FadeIn>
             <Link
@@ -298,7 +295,7 @@ export default function Terms() {
             </div>
           </FadeIn>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

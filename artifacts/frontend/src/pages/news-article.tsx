@@ -2,7 +2,6 @@ import { useParams, Link } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/fade-in";
-import { PublicNavbar } from "@/components/navbar";
 import { ARTICLES } from "@/data/articles";
 import {
   Calendar,
@@ -25,7 +24,6 @@ export default function NewsArticlePage() {
   if (!article) {
     return (
       <div className="min-h-screen bg-white">
-        <PublicNavbar />
         <div className="max-w-3xl mx-auto px-6 py-32 text-center">
           <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
             Article not found
@@ -93,8 +91,6 @@ export default function NewsArticlePage() {
           })}
         </script>
       </Helmet>
-
-      <PublicNavbar />
 
       <div className="relative h-[420px] md:h-[520px] overflow-hidden bg-white">
         <img
@@ -275,12 +271,6 @@ export default function NewsArticlePage() {
           </Link>
         </FadeIn>
       </section>
-
-      <footer className="bg-white border-t border-gray-200 text-gray-600 py-8 px-6 text-center text-xs">
-        <p>
-          © {new Date().getFullYear()} Shiprion Logistics. All rights reserved.
-        </p>
-      </footer>
     </>
   );
 }

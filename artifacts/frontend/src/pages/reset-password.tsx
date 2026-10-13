@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { PublicNavbar } from "@/components/navbar";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +26,7 @@ export default function ResetPasswordPage() {
   };
   return (
     <div className="min-h-screen bg-gray-50">
-      <PublicNavbar />
-      <main className="max-w-md mx-auto px-5 py-24">
+      <div className="max-w-md mx-auto px-5 py-24">
         <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
           <h1 className="text-2xl font-extrabold text-gray-900">
             Choose a new password
@@ -75,7 +73,7 @@ export default function ResetPasswordPage() {
             </form>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

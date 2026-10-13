@@ -1,12 +1,14 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HelmetProvider } from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/auth";
 import { CookieBanner } from "@/components/cookie-banner";
+
+const PublicPageLayout = lazy(() => import("@/shiprion/PublicPageLayout"));
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Shiprion = lazy(() => import("@/shiprion/Shiprion"));
@@ -82,7 +84,11 @@ function AnimatedSwitch() {
           <Route path="/legal">
             <Shiprion page="legal" />
           </Route>
-          <Route path="/news/:slug" component={NewsArticlePage} />
+          <Route path="/news/:slug">
+            <PublicPageLayout page="news">
+              <NewsArticlePage />
+            </PublicPageLayout>
+          </Route>
           <Route path="/news">
             <Shiprion page="news" />
           </Route>
@@ -92,21 +98,57 @@ function AnimatedSwitch() {
           <Route path="/privacy">
             <Shiprion page="privacy" />
           </Route>
-          <Route path="/terms" component={Terms} />
-          <Route path="/cookies" component={CookiePolicy} />
-          <Route path="/faq" component={FaqPage} />
-          <Route path="/shipping-policy" component={ShippingPolicy} />
-          <Route path="/insurance-policy" component={InsurancePolicy} />
+          <Route path="/terms">
+            <PublicPageLayout page="terms">
+              <Terms />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/cookies">
+            <PublicPageLayout page="cookies">
+              <CookiePolicy />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/faq">
+            <PublicPageLayout page="faq">
+              <FaqPage />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/shipping-policy">
+            <PublicPageLayout page="shipping-policy">
+              <ShippingPolicy />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/insurance-policy">
+            <PublicPageLayout page="insurance-policy">
+              <InsurancePolicy />
+            </PublicPageLayout>
+          </Route>
           <Route path="/track/:trackingNumber" component={TrackPage} />
           <Route path="/track" component={TrackPage} />
           <Route path="/login" component={Login} />
-          <Route path="/forgot-password" component={ForgotPassword} />
-          <Route path="/reset-password" component={ResetPassword} />
-          <Route path="/claim-quote" component={ClaimQuote} />
+          <Route path="/forgot-password">
+            <PublicPageLayout page="forgot-password">
+              <ForgotPassword />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/reset-password">
+            <PublicPageLayout page="reset-password">
+              <ResetPassword />
+            </PublicPageLayout>
+          </Route>
+          <Route path="/claim-quote">
+            <PublicPageLayout page="claim-quote">
+              <ClaimQuote />
+            </PublicPageLayout>
+          </Route>
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin" component={Admin} />
-          <Route component={NotFound} />
+          <Route>
+            <PublicPageLayout page="not-found">
+              <NotFound />
+            </PublicPageLayout>
+          </Route>
         </Switch>
       </div>
     </Suspense>
@@ -114,12 +156,16 @@ function AnimatedSwitch() {
 }
 
 function App() {
+  useEffect(() => {
+    document.getElementById("default-description")?.remove();
+  }, []);
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <AuthProvider>
+              <DefaultDescription />
               <AnimatedSwitch />
               <LegacyCookieBanner />
             </AuthProvider>
@@ -132,9 +178,9 @@ function App() {
   );
 }
 
-function LegacyCookieBanner() {
+function DefaultDescription() {
   const [location] = useLocation();
-  return location.startsWith("/track") ||
+  const hasPageDescription =
     [
       "/",
       "/about",
@@ -142,11 +188,35 @@ function LegacyCookieBanner() {
       "/news",
       "/privacy",
       "/legal",
+      "/services",
       "/calculator",
       "/contact",
-    ].includes(location) ? null : (
-    <CookieBanner />
+      "/terms",
+      "/cookies",
+      "/faq",
+      "/shipping-policy",
+      "/insurance-policy",
+      "/login",
+    ].includes(location) ||
+    location.startsWith("/track") ||
+    location.startsWith("/news/");
+  return hasPageDescription ? null : (
+    <Helmet>
+      <meta
+        name="description"
+        content="Ship smarter with Shiprion — enterprise logistics across 180+ countries. AI-optimized routing, real-time shipment tracking, air freight, road freight, and ocean freight with 24/7 support."
+      />
+    </Helmet>
   );
+}
+
+function LegacyCookieBanner() {
+  const [location] = useLocation();
+  return ["/login", "/dashboard", "/admin", "/admin/login"].includes(
+    location,
+  ) ? (
+    <CookieBanner />
+  ) : null;
 }
 
 export default App;

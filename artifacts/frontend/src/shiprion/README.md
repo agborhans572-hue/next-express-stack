@@ -14,6 +14,22 @@ in use. Tool styles keep the document's default font scale so existing shipment
 detail and chat components remain readable. Animation and scrolling effects are
 removed on navigation, and reduced motion is supported.
 
+Services now uses `ToolLayout.tsx`, with an editorial hero, service grid, benefits,
+shipping steps, route list, and accessible FAQ. `PublicPageLayout.tsx` and
+`public-pages.css` apply the same header, fonts, orange palette, square controls,
+and newsletter footer to FAQ, policies, articles, recovery, quote-claim, and
+not-found pages. Existing content and API workflows remain in use. Reduced motion
+keeps public content visible. Only internal account/dashboard routes use the
+legacy cookie banner; public routes share the current consent component.
+
+The Home and About company description restores the original Shiprion logistics
+copy. Home's title, description, and social descriptions also restore the original
+logistics identity. The initial HTML description is removed once the application
+mounts so React's page metadata does not duplicate it; routes without their own
+description receive the default logistics description.
+`e2e/shiprion-public-pages.spec.ts` covers desktop/mobile layout, navigation,
+service FAQ, recovery, FAQ search, and restored metadata.
+
 `navigation.ts` restores the original Shiprion footer destinations across all nine
 pages and adds tracking, calculator, and contact links to the marketing headers
 and mobile menus. Account, dashboard, admin, services, and policy URLs remain

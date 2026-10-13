@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { PublicNavbar } from "@/components/navbar";
 import { useAuth } from "@/context/auth";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -31,8 +30,7 @@ export default function ClaimQuotePage() {
   const returnTo = `/claim-quote?token=${encodeURIComponent(token)}`;
   return (
     <div className="min-h-screen bg-gray-50">
-      <PublicNavbar />
-      <main className="max-w-lg mx-auto px-5 py-24">
+      <div className="max-w-lg mx-auto px-5 py-24">
         <div className="bg-white border border-gray-200 rounded-3xl p-9 text-center shadow-sm">
           {isLoading || state === "claiming" ? (
             <>
@@ -85,7 +83,7 @@ export default function ClaimQuotePage() {
             </>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

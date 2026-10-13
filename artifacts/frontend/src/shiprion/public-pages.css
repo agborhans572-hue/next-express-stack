@@ -1,0 +1,75 @@
+.tool-public-page {
+  padding-top: 48px;
+  background: #fff;
+}
+.tool-public-page h1 {
+  font-size: clamp(38px, 5vw, 76px);
+  line-height: 1.06;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+.tool-public-page h2,
+.tool-public-page h3 {
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.tool-public-page [class*="text-olive"],
+.tool-public-page [class*="hover:text-olive"]:hover {
+  color: #ff471d;
+}
+.tool-public-page [class*="bg-olive"] {
+  background-color: #fff0eb;
+}
+.tool-public-page [class*="bg-olive"][class*="text-white"] {
+  background-color: #ff471d;
+}
+.tool-public-page a[class*="bg-olive"],
+.tool-public-page button[class*="bg-olive"] {
+  background-color: #ff471d;
+  color: #fff;
+}
+.tool-public-page [class*="border-olive"] {
+  border-color: #ff471d;
+}
+.tool-public-page [class*="rounded"] {
+  border-radius: 0;
+}
+.tool-public-page [class*="shadow"],
+.tool-public-page [class*="glow"] {
+  box-shadow: none;
+}
+.tool-public-page [class*=" blur-"],
+.tool-public-page [class^="blur-"],
+.tool-public-page .bg-grid-pattern {
+  display: none;
+}
+.tool-public-page [class*="bg-gray-50"] {
+  background: #f5f5f3;
+}
+.tool-public-page [class*="font-extrabold"] {
+  font-weight: 500;
+}
+.tool-public-page [class*="max-w-4xl"],
+.tool-public-page [class*="max-w-5xl"] {
+  max-width: 1120px;
+}
+.tool-public-page input:focus,
+.tool-public-page textarea:focus {
+  border-color: #ff471d;
+  --tw-ring-color: #ff471d;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-public-page [style*="opacity"] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+@media (max-width: 600px) {
+  .tool-public-page {
+    padding-top: 28px;
+  }
+  .tool-public-page h1 {
+    font-size: 38px;
+    overflow-wrap: anywhere;
+  }
+}

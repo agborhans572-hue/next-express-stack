@@ -37,7 +37,7 @@ const templates = Object.fromEntries(
 ) as Record<"home" | "about" | "tech" | "news" | "privacy" | "legal", string>;
 export type ShiprionPage = keyof typeof templates;
 const titles: Record<ShiprionPage, string> = {
-  home: "Shiprion — Wind-powered shipping",
+  home: "Shiprion | Global Logistics Platform — Air, Road & Ocean Freight",
   about: "About us — Shiprion",
   tech: "Technology — Shiprion",
   news: "News & Media — Shiprion",
@@ -589,10 +589,18 @@ export default function Shiprion({ page }: { page: ShiprionPage }) {
         <link rel="icon" type="image/svg+xml" href="/shiprion/brand-icon.svg" />
         <meta
           name="description"
-          content="Shiprion is developing small, autonomous, wind-powered cargo ships for sustainable and economically viable commercial shipping."
+          content="Ship smarter with Shiprion — enterprise logistics across 180+ countries. AI-optimized routing, real-time shipment tracking, air freight, road freight, and ocean freight with 24/7 support."
         />
         <meta property="og:title" content={titles[page]} />
+        <meta
+          property="og:description"
+          content="Ship smarter with Shiprion — enterprise logistics across 180+ countries. AI-optimized routing, real-time tracking, and 24/7 operations support."
+        />
         <meta name="twitter:title" content={titles[page]} />
+        <meta
+          name="twitter:description"
+          content="Enterprise logistics across 180+ countries. AI-optimized routing, real-time tracking, air, road & ocean freight."
+        />
         <link
           rel="canonical"
           href={`https://www.shiprion.com${page === "home" ? "/" : page === "tech" ? "/tech" : `/${page}`}`}

@@ -164,7 +164,7 @@ export default function ToolLayout({
   page,
 }: {
   children: ReactNode;
-  page: "track" | "calculator" | "contact";
+  page: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);

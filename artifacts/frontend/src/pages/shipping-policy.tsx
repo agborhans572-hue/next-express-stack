@@ -1,6 +1,5 @@
 import { Helmet } from "react-helmet-async";
 import { FadeIn } from "@/components/fade-in";
-import { PublicNavbar } from "@/components/navbar";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -219,8 +218,8 @@ export default function ShippingPolicy() {
           content="Destinations, timeframes, packaging requirements, prohibited items, and delivery procedures."
         />
       </Helmet>
-      <PublicNavbar />
-      <main className="px-4 sm:px-6 py-16 sm:py-20">
+
+      <div className="px-4 sm:px-6 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto">
           <FadeIn>
             <Link
@@ -333,7 +332,7 @@ export default function ShippingPolicy() {
             </div>
           </FadeIn>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
